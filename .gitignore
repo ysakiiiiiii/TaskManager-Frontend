@@ -13,7 +13,7 @@ lerna-debug.log*
 *.dmp
 
 # =====================================================
-# ✅ Runtime & Cache
+# Runtime & Cache
 # =====================================================
 .cache/
 .pnp/
@@ -34,7 +34,7 @@ build/Release/
 *.tsbuildinfo
 
 # =====================================================
-# ✅ Env files (do not push secrets)
+# Env files 
 # =====================================================
 .env
 .env.*
@@ -43,7 +43,7 @@ build/Release/
 *.local
 
 # =====================================================
-# ✅ Editor/IDE/OS
+# Editor/IDE/OS
 # =====================================================
 .vscode/
 !.vscode/extensions.json
@@ -60,7 +60,7 @@ build/Release/
 *.swp
 
 # =====================================================
-# ✅ Package outputs
+# Package outputs
 # =====================================================
 *.tgz
 .yarn-integrity
@@ -68,7 +68,7 @@ build/Release/
 yalc.lock
 
 # =====================================================
-# ✅ Frameworks & Tools
+# Frameworks & Tools
 # =====================================================
 # Next.js
 .next/
@@ -90,7 +90,7 @@ bower_components/
 .cache/
 
 # =====================================================
-# ✅ Frontend folders
+# Frontend folders
 # =====================================================
 public/
 www/.cache/
@@ -100,7 +100,7 @@ cjs/
 jspm_packages/
 
 # =====================================================
-# ✅ Testing
+# Testing
 # =====================================================
 # Jest / Vitest
 .vitest/
@@ -112,7 +112,7 @@ cypress/screenshots/
 cypress/videos/
 
 # =====================================================
-# ✅ Docker (optional, if used)
+# Docker 
 # =====================================================
 Dockerfile
 .dockerignore
@@ -121,7 +121,7 @@ docker-compose.override.yml
 *.container.log
 
 # =====================================================
-# ✅ Databases (optional local files)
+# Databases 
 # =====================================================
 *.sqlite
 *.sqlite3
