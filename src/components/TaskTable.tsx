@@ -1,157 +1,181 @@
-// src/components/TaskTable.tsx
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import '../styles/TaskTable.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Table, Card, ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
-// Define types for Task, Checklist, Attachment, etc.
-type AssignedUser = {
-  taskId: number;
-  userId: string;
+import type { Task, Status } from '../data/types';
+import { allTasks } from '../data/allTasks';   
+
+const getStatusBadgeClass = (status: Status): string => {
+  switch (status) {
+    case 'To Do':
+      return 'bg-warning text-dark';
+    case 'In Progress':
+      return 'bg-danger text-white';
+    case 'Done':
+      return 'bg-primary text-white';
+    case 'On Hold':
+      return 'bg-indigo text-white';
+    default:
+      return 'bg-success text-white';
+  }
 };
 
-type ChecklistItem = {
-  id: number;
-  description: string;
-  isCompleted: boolean;
-};
+export default function TaskTable() {
+  const [filters, setFilters] = useState<{
+    category: string;
+    priority: string;
+    status: string;
+  }>({ category: '', priority: '', status: '' });
 
-type Attachment = {
-  id: number;
-  fileName: string;
-  fileExtension: string;
-  filePath: string;
-  dateUploaded: string;
-  uploadedById: string;
-};
+  const [search, setSearch] = useState('');
+  const [view, setView] = useState<'list' | 'card'>('list');
+  const [page, setPage] = useState(1);
+  const tasksPerPage = 10;
 
-type Task = {
-  id: number;
-  title: string;
-  description: string;
-  createdById: string;
-  categoryId: number;
-  priorityId: number;
-  statusId: number;
-  dateCreated: string;
-  dateModified: string | null;
-  dueDate: string;
-  assignedUsers: AssignedUser[];
-  checklistItems: ChecklistItem[];
-  comments: any[];
-  attachments: Attachment[];
-};
+  const filteredTasks = allTasks.filter((task) => {
+    return (
+      (filters.category === '' || task.category === filters.category) &&
+      (filters.priority === '' || task.priority === filters.priority) &&
+      (filters.status === '' || task.status === filters.status) &&
+      (task.title.toLowerCase().includes(search.toLowerCase()) ||
+        task.assignedTo.name.toLowerCase().includes(search.toLowerCase()))
+    );
+  });
 
-const TaskTable: React.FC = () => {
-  const [task, setTask] = useState<Task | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'box'>('list');
+  const paginatedTasks = filteredTasks.slice(
+    (page - 1) * tasksPerPage,
+    page * tasksPerPage
+  );
 
-  useEffect(() => {
-    axios
-      .get('https://localhost:7179/api/TaskItem/2')
-      .then((res) => {
-        setTask(res.data.data);
-      })
-      .catch((err) => console.error('Error fetching task:', err));
-  }, []);
+  const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
 
-  if (!task) return <p className="text-center mt-4">Loading...</p>;
+  const handleFilterChange = (key: keyof typeof filters, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setPage(1);
+  };
 
   return (
     <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>{task.title}</h2>
-        <ToggleButtonGroup type="radio" name="view" defaultValue={viewMode} onChange={(val) => setViewMode(val)}>
-          <ToggleButton id="list" value={'list'} variant="outline-primary">List View</ToggleButton>
-          <ToggleButton id="box" value={'box'} variant="outline-secondary">Box View</ToggleButton>
-        </ToggleButtonGroup>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4 className="mb-0">Tasks</h4>
+        <div>
+          <button className="btn btn-outline-secondary me-2" onClick={() => setView('list')}>
+            <i className="bi bi-list"></i>
+          </button>
+          <button className="btn btn-outline-secondary me-2" onClick={() => setView('card')}>
+            <i className="bi bi-grid-3x3-gap"></i>
+          </button>
+          <button className="btn btn-primary">+ Add New Task</button>
+        </div>
       </div>
 
-      <p><strong>Description:</strong> {task.description}</p>
-      <p><strong>Due Date:</strong> {new Date(task.dueDate).toLocaleString()}</p>
-
-      <h4 className="mt-4">Checklist</h4>
-      {viewMode === 'list' ? (
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Description</th>
-              <th>Completed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {task.checklistItems.map(item => (
-              <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.description}</td>
-                <td>{item.isCompleted ? '✅' : '❌'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      ) : (
-        <div className="row">
-          {task.checklistItems.map(item => (
-            <div className="col-md-4 mb-3" key={item.id}>
-              <Card border={item.isCompleted ? "success" : "danger"}>
-                <Card.Body>
-                  <Card.Title>#{item.id}</Card.Title>
-                  <Card.Text>{item.description}</Card.Text>
-                  <Card.Text>Status: {item.isCompleted ? '✅ Completed' : '❌ Not Completed'}</Card.Text>
-                </Card.Body>
-              </Card>
-            </div>
-          ))}
+      <div className="row g-2 mb-3">
+        <div className="col-md-3">
+          <select className="form-select" onChange={(e) => handleFilterChange('category', e.target.value)}>
+            <option value="">Select Category</option>
+            <option value="UI/UX">UI/UX</option>
+            <option value="Backend">Backend</option>
+            <option value="Documentation">Documentation</option>
+          </select>
         </div>
-      )}
+        <div className="col-md-3">
+          <select className="form-select" onChange={(e) => handleFilterChange('priority', e.target.value)}>
+            <option value="">Select Priority</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <div className="col-md-3">
+          <select className="form-select" onChange={(e) => handleFilterChange('status', e.target.value)}>
+            <option value="">Select Status</option>
+            <option value="To Do">To Do</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Done">Done</option>
+            <option value="On Hold">On Hold</option>
+          </select>
+        </div>
+        <div className="col-md-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search Task/User"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
 
-      <h4 className="mt-4">Attachments</h4>
-      {viewMode === 'list' ? (
-        <Table striped bordered hover responsive>
-          <thead>
+      {view === 'list' ? (
+        <table className="table table-bordered align-middle">
+          <thead className="table-light">
             <tr>
-              <th>ID</th>
-              <th>File Name</th>
-              <th>Type</th>
-              <th>Date Uploaded</th>
-              <th>Download</th>
+              <th>Task Title</th>
+              <th>Assigned To</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {task.attachments.map(file => (
-              <tr key={file.id}>
-                <td>{file.id}</td>
-                <td>{file.fileName}</td>
-                <td>{file.fileExtension}</td>
-                <td>{new Date(file.dateUploaded).toLocaleString()}</td>
+            {paginatedTasks.map((task, idx) => (
+              <tr key={idx}>
                 <td>
-                  <a href={file.filePath} target="_blank" rel="noreferrer" className="btn btn-sm btn-primary">
-                    Download
-                  </a>
+                  <div>{task.title}</div>
+                  <small className="text-muted">Created by {task.assignedTo.name}</small>
+                </td>
+                <td>
+                  <div className="d-flex align-items-center gap-2">
+                    <img src={task.assignedTo.avatar} alt="avatar" className="rounded-circle" width="40" height="40" />
+                    <div>
+                      <div>{task.assignedTo.name}</div>
+                      <div className="text-muted" style={{ fontSize: '0.8rem' }}>{task.assignedTo.email}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>{task.category}</td>
+                <td>{task.priority}</td>
+                <td>
+                  <span className={`badge ${getStatusBadgeClass(task.status)}`}>{task.status}</span>
+                </td>
+                <td>
+                  <i className="bi bi-trash me-2 cursor-pointer"></i>
+                  <i className="bi bi-eye me-2 cursor-pointer"></i>
+                  <i className="bi bi-three-dots"></i>
                 </td>
               </tr>
             ))}
           </tbody>
-        </Table>
+        </table>
       ) : (
         <div className="row">
-          {task.attachments.map(file => (
-            <div className="col-md-4 mb-3" key={file.id}>
-              <Card>
-                <Card.Body>
-                  <Card.Title>{file.fileName}</Card.Title>
-                  <Card.Subtitle className="mb-2 text-muted">{file.fileExtension}</Card.Subtitle>
-                  <Card.Text>Uploaded: {new Date(file.dateUploaded).toLocaleString()}</Card.Text>
-                  <Button variant="primary" href={file.filePath} target="_blank" rel="noreferrer">Download</Button>
-                </Card.Body>
-              </Card>
+          {paginatedTasks.map((task, idx) => (
+            <div key={idx} className="col-md-6 mb-3">
+              <div className="card h-100">
+                <div className="card-body">
+                  <h5 className="card-title">{task.title}</h5>
+                  <p className="card-subtitle text-muted mb-2">Created by {task.assignedTo.name}</p>
+                  <p className="mb-1"><strong>Category:</strong> {task.category}</p>
+                  <p className="mb-1"><strong>Priority:</strong> {task.priority}</p>
+                  <p className="mb-1"><strong>Status:</strong> <span className={`badge ${getStatusBadgeClass(task.status)}`}>{task.status}</span></p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       )}
+
+      <nav className="mt-3">
+        <ul className="pagination justify-content-center">
+          {[...Array(totalPages)].map((_, i) => (
+            <li key={i} className={`page-item ${page === i + 1 ? 'active' : ''}`}>
+              <button className="page-link" onClick={() => setPage(i + 1)}>{i + 1}</button>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   );
-};
-
-export default TaskTable;
+}
