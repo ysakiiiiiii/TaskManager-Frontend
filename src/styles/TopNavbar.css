@@ -1,0 +1,32 @@
+.top-navbar {
+  height: 60px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  z-index: 1001;
+  position: relative;
+}
+
+.search-box {
+  min-width: 200px;
+  background-color: #f1f3f5;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+@media(max-width: 900px){
+   .top-navbar{
+      margin: 20px;
+   }
+}
+
+@media(min-width: 901px){
+   .top-navbar{
+      margin: 20px 20px 20px 90px; 
+   }
+}
