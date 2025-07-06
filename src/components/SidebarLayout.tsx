@@ -4,12 +4,12 @@ import '../styles/SidebarLayout.css';
 import TaskTable from './TaskTable';
 
 const SidebarLayout: React.FC = () => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1200);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth <= 900;
+      const mobile = window.innerWidth <= 1200;
       setIsMobile(mobile);
       if (!mobile) setSidebarOpen(false);
     };
@@ -21,39 +21,37 @@ const SidebarLayout: React.FC = () => {
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
   return (
-    <div style={{ height: '100vh', overflow: 'hidden', background: '#f5f4f9' }}>
-      <div className="layout-container">
-        {/* Sidebar */}
-        <div
-          className={`sidebar d-flex flex-column p-2 ${
-            isMobile ? (isSidebarOpen ? 'open' : '') : 'collapsed'
-          }`}
-        >
-          <a href="#" className="nav-link mb-2">
-            <i className="bi bi-house-door"></i>
-            <span className="nav-label">Dashboard</span>
-          </a>
-          <a href="#" className="nav-link mb-2">
-            <i className="bi bi-person"></i>
-            <span className="nav-label">Users</span>
-          </a>
-          <a href="#" className="nav-link mb-2">
-            <i className="bi bi-gear"></i>
-            <span className="nav-label">Settings</span>
-          </a>
-        </div>
+    <div className="layout-container">
+      {/* Sidebar */}
+      <div
+        className={`sidebar d-flex flex-column p-2 ${
+          isMobile ? (isSidebarOpen ? 'open' : '') : 'collapsed'
+        }`}
+      >
+        <a href="#" className="nav-link mb-2">
+          <i className="bi bi-house-door"></i>
+          <span className="nav-label">Dashboard</span>
+        </a>
+        <a href="#" className="nav-link mb-2">
+          <i className="bi bi-person"></i>
+          <span className="nav-label">Users</span>
+        </a>
+        <a href="#" className="nav-link mb-2">
+          <i className="bi bi-gear"></i>
+          <span className="nav-label">Settings</span>
+        </a>
+      </div>
 
-        {/* Overlay for mobile */}
-        {isMobile && isSidebarOpen && (
-          <div className="overlay" onClick={() => setSidebarOpen(false)} />
-        )}
+      {/* Overlay for mobile */}
+      {isMobile && isSidebarOpen && (
+        <div className="overlay" onClick={() => setSidebarOpen(false)} />
+      )}
 
-        {/* Main content */}
-        <div className="content-area">
-          <TopNavbar onToggleSidebar={toggleSidebar} />
-          <div className="main-content">
-            <TaskTable /> 
-          </div>
+      {/* Main content area */}
+      <div className="content-area d-flex flex-column">
+        <TopNavbar onToggleSidebar={toggleSidebar} />
+        <div className="main-content flex-grow-1 overflow-auto px-3">
+          <TaskTable />
         </div>
       </div>
     </div>

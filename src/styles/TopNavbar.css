@@ -19,14 +19,17 @@
   cursor: pointer;
 }
 
-@media(max-width: 900px){
-   .top-navbar{
-      margin: 20px;
-   }
+/* MOBILE view */
+@media (max-width: 1200px) {
+  .top-navbar {
+    margin: 20px;
+  }
 }
 
-@media(min-width: 901px){
-   .top-navbar{
-      margin: 20px 20px 20px 90px; 
-   }
+/* DESKTOP view */
+@media (min-width: 1201px) {
+  .top-navbar {
+    margin: 20px 20px 20px 90px;
+  }
 }
+
