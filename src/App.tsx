@@ -4,7 +4,7 @@ import TaskTable from './components/TaskTable';
 import Dashboard from './pages/AdminDashboard';
 
 function App() {
-  return <Dashboard />;
+  return <SidebarLayout />;
 }
 
 export default App;

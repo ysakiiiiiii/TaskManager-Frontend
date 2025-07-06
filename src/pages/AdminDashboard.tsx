@@ -3,7 +3,7 @@ import { allTasks } from '../data/allTasks';
 import { BarChart, Bar, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import RecentTasks from '../components/RecentTasks';
-import type { Task, Status, Priority, Category } from '../types';
+import type { Task, Status, Priority, Category } from '../data/types';
 
 const COLORS = {
   Pending: '#7E57C2',
@@ -103,7 +103,7 @@ const Dashboard = () => {
     .slice(0, 5);
 
   return (
-    <div className="container-fluid py-4">
+    <div className="container-fluid">
       {/* Greeting Section */}
       <div className="row mb-4">
         <div className="col-md-12">
@@ -288,8 +288,7 @@ const Dashboard = () => {
         <div className="col-md-12">
           <div className="card border-0 shadow-sm">
             <div className="card-body">
-              <h5 className="card-title mb-4">Recent Tasks</h5>
-              <RecentTasks tasks={recentTasks} onTaskSelect={() => {}} />
+              <RecentTasks tasks={allTasks} onTaskSelect={() => {}} />
             </div>
           </div>
         </div>
