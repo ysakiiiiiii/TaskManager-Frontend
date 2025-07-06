@@ -4,13 +4,14 @@ import { getStatusColor } from "./TaskTable";
 
 interface TaskCardViewProps {
   tasks: Task[];
+  onTaskSelect: (task: Task) => void;  
 }
 
-const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks }) => {
+const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks, onTaskSelect }) => {
   return (
     <div className="row">
       {tasks.map((task, idx) => (
-        <div key={idx} className="col-md-6 col-lg-4 mb-4">
+        <div onClick={() => onTaskSelect(task)} key={idx} className="col-md-6 col-lg-4 mb-4">
           <div 
             className="card h-100 shadow-sm p-3 transition-all"
             style={{

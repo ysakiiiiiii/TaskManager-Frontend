@@ -4,9 +4,10 @@ import { getStatusColor } from "./TaskTable";
 
 interface TaskListViewProps {
   tasks: Task[];
+  onTaskSelect: (task: Task) => void;
 }
 
-const TaskListView: React.FC<TaskListViewProps> = ({ tasks }) => {
+const TaskListView: React.FC<TaskListViewProps> = ({ tasks, onTaskSelect }) => {
   return (
     <table className="table table-bordered align-middle table-fixed w-100">
       <thead className="table-light">
@@ -21,7 +22,7 @@ const TaskListView: React.FC<TaskListViewProps> = ({ tasks }) => {
       </thead>
       <tbody>
         {tasks.map((task, idx) => (
-          <tr key={idx}>
+          <tr onClick={() => onTaskSelect(task)} key={idx}>
             <td style={{ borderLeft: `5px solid ${getStatusColor(task.status)}`, borderRadius: "8px 0 0 8px" }}>
               <div>{task.title}</div>
               <small className="text-muted d-sm-none">By {task.createdBy.name}</small>
@@ -44,7 +45,7 @@ const TaskListView: React.FC<TaskListViewProps> = ({ tasks }) => {
             </td>
             <td className="d-none d-xl-table-cell">
               <i className="bi bi-trash me-2 cursor-pointer"></i>
-              <i className="bi bi-eye me-2 cursor-pointer"></i>
+              <i className="bi bi-eye me-2 cursor-pointer" onClick={() => onTaskSelect(task)}></i>
               <i className="bi bi-three-dots"></i>
             </td>
           </tr>
