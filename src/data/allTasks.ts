@@ -59,9 +59,9 @@ export const allTasks: Task[] = [
       email: 'tech@example.com', 
       avatar: 'https://i.pravatar.cc/40?img=15' 
     },
-    category: 'Backend',
+    category: 'DevOps',
     priority: 'Medium',
-    status: 'To Do',
+    status: 'On Hold',
     checklist: [
       { id: 'c1', text: 'Identify slow queries', completed: false },
       { id: 'c2', text: 'Analyze current indexes', completed: false },
