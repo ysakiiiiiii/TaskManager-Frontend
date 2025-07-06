@@ -1,287 +1,113 @@
 import type { Task } from './types';
 
 export const allTasks: Task[] = [
- {
-  title: 'Fix Login Redirect Bug',
-  assignedTo: { name: 'Eliza Herring', email: 'eliza@example.com', avatar: 'https://i.pravatar.cc/40?img=5' },
-  createdBy: { name: 'QA Team', email: 'qa@example.com', avatar: 'https://i.pravatar.cc/40?img=14' },
-  category: 'UI/UX',
-  priority: 'High',
-  status: 'In Progress',
-  description: 'Users are being redirected incorrectly after login, investigate and fix',
-  completedTasks: 2,
-  totalTasks: 3,
-  startDate: '18/03/25',
-  dueDate: '22/03/25'
-},
-{
-  title: 'Optimize Database Indexes',
-  assignedTo: { name: 'Derek Small', email: 'derek@example.com', avatar: 'https://i.pravatar.cc/40?img=6' },
-  createdBy: { name: 'Tech Lead', email: 'tech@example.com', avatar: 'https://i.pravatar.cc/40?img=15' },
-  category: 'Backend',
-  priority: 'Medium',
-  status: 'To Do',
-  description: 'Review and optimize indexes for faster query performance',
-  completedTasks: 0,
-  totalTasks: 2,
-  startDate: '21/03/25',
-  dueDate: '27/03/25'
-},
-{
-  title: 'Design New Landing Page',
-  assignedTo: { name: 'Celia Morano', email: 'celia@example.com', avatar: 'https://i.pravatar.cc/40?img=7' },
-  createdBy: { name: 'Marketing', email: 'marketing@example.com', avatar: 'https://i.pravatar.cc/40?img=16' },
-  category: 'UI/UX',
-  priority: 'High',
-  status: 'To Do',
-  description: 'Create Figma design for new landing page targeting enterprise clients',
-  completedTasks: 0,
-  totalTasks: 4,
-  startDate: '19/03/25',
-  dueDate: '28/03/25'
-},
-{
-  title: 'Setup CI/CD Pipeline',
-  assignedTo: { name: 'Ben Ortega', email: 'ben@example.com', avatar: 'https://i.pravatar.cc/40?img=8' },
-  createdBy: { name: 'DevOps Team', email: 'devops@example.com', avatar: 'https://i.pravatar.cc/40?img=17' },
-  category: 'DevOps',
-  priority: 'High',
-  status: 'In Progress',
-  description: 'Configure GitHub Actions for test and deployment automation',
-  completedTasks: 2,
-  totalTasks: 3,
-  startDate: '16/03/25',
-  dueDate: '24/03/25'
-},
-{
-  title: 'Conduct Security Audit',
-  assignedTo: { name: 'Nina Barrow', email: 'nina@example.com', avatar: 'https://i.pravatar.cc/40?img=9' },
-  createdBy: { name: 'Security Team', email: 'security@example.com', avatar: 'https://i.pravatar.cc/40?img=18' },
-  category: 'Testing',
-  priority: 'High',
-  status: 'To Do',
-  description: 'Review system for vulnerabilities and submit findings',
-  completedTasks: 0,
-  totalTasks: 3,
-  startDate: '23/03/25',
-  dueDate: '30/03/25'
-},
-{
-  title: 'Refactor Notification Service',
-  assignedTo: { name: 'Ivy Chung', email: 'ivy@example.com', avatar: 'https://i.pravatar.cc/40?img=10' },
-  createdBy: { name: 'Backend Team', email: 'backend@example.com', avatar: 'https://i.pravatar.cc/40?img=19' },
-  category: 'Backend',
-  priority: 'Medium',
-  status: 'On Hold',
-  description: 'Refactor for better performance and maintainability',
-  completedTasks: 1,
-  totalTasks: 4,
-  startDate: '17/03/25',
-  dueDate: '25/03/25'
-},
-{
-  title: 'Test Mobile Responsiveness',
-  assignedTo: { name: 'Oscar Wren', email: 'oscar@example.com', avatar: 'https://i.pravatar.cc/40?img=11' },
-  createdBy: { name: 'QA Team', email: 'qa@example.com', avatar: 'https://i.pravatar.cc/40?img=20' },
-  category: 'Testing',
-  priority: 'Medium',
-  status: 'In Progress',
-  description: 'Ensure UI works well on all mobile breakpoints',
-  completedTasks: 1,
-  totalTasks: 2,
-  startDate: '19/03/25',
-  dueDate: '23/03/25'
-},
-{
-  title: 'Create FAQ Page',
-  assignedTo: { name: 'Lila Moore', email: 'lila@example.com', avatar: 'https://i.pravatar.cc/40?img=12' },
-  createdBy: { name: 'Support Team', email: 'support@example.com', avatar: 'https://i.pravatar.cc/40?img=21' },
-  category: 'Documentation',
-  priority: 'Low',
-  status: 'To Do',
-  description: 'Write common questions and answers in markdown format',
-  completedTasks: 0,
-  totalTasks: 3,
-  startDate: '20/03/25',
-  dueDate: '27/03/25'
-},
-{
-  title: 'Redesign Login Screen',
-  assignedTo: { name: 'Tariq Abdi', email: 'tariq@example.com', avatar: 'https://i.pravatar.cc/40?img=13' },
-  createdBy: { name: 'UI Team', email: 'ui@example.com', avatar: 'https://i.pravatar.cc/40?img=22' },
-  category: 'UI/UX',
-  priority: 'Medium',
-  status: 'Done',
-  description: 'Apply branding changes to login page',
-  completedTasks: 2,
-  totalTasks: 2,
-  startDate: '10/03/25',
-  dueDate: '15/03/25'
-},
-{
-  title: 'Migrate Data to New Server',
-  assignedTo: { name: 'Rhea Long', email: 'rhea@example.com', avatar: 'https://i.pravatar.cc/40?img=14' },
-  createdBy: { name: 'Infra Team', email: 'infra@example.com', avatar: 'https://i.pravatar.cc/40?img=23' },
-  category: 'DevOps',
-  priority: 'High',
-  status: 'In Progress',
-  description: 'Move all production data to new AWS instance',
-  completedTasks: 2,
-  totalTasks: 4,
-  startDate: '12/03/25',
-  dueDate: '20/03/25'
-},
-{
-  title: 'Review Codebase for ESLint Errors',
-  assignedTo: { name: 'Felix Vaughn', email: 'felix@example.com', avatar: 'https://i.pravatar.cc/40?img=15' },
-  createdBy: { name: 'UI/UX Team', email: 'UI/UX@example.com', avatar: 'https://i.pravatar.cc/40?img=24' },
-  category: 'UI/UX',
-  priority: 'Low',
-  status: 'To Do',
-  description: 'Run ESLint and fix warnings/errors across all modules',
-  completedTasks: 0,
-  totalTasks: 3,
-  startDate: '21/03/25',
-  dueDate: '26/03/25'
-},
-{
-  title: 'Generate Monthly Report',
-  assignedTo: { name: 'Chloe Spence', email: 'chloe@example.com', avatar: 'https://i.pravatar.cc/40?img=16' },
-  createdBy: { name: 'Manager', email: 'manager@example.com', avatar: 'https://i.pravatar.cc/40?img=25' },
-  category: 'Documentation',
-  priority: 'Medium',
-  status: 'Done',
-  description: 'Export and format report for stakeholder meeting',
-  completedTasks: 2,
-  totalTasks: 2,
-  startDate: '01/03/25',
-  dueDate: '05/03/25'
-},
-{
-  title: 'Upgrade Dependencies',
-  assignedTo: { name: 'Liam Franco', email: 'liam@example.com', avatar: 'https://i.pravatar.cc/40?img=17' },
-  createdBy: { name: 'Tech Lead', email: 'tech@example.com', avatar: 'https://i.pravatar.cc/40?img=26' },
-  category: 'Backend',
-  priority: 'Medium',
-  status: 'To Do',
-  description: 'Upgrade all outdated packages and test build',
-  completedTasks: 0,
-  totalTasks: 3,
-  startDate: '22/03/25',
-  dueDate: '26/03/25'
-},
-{
-  title: 'Add Multi-Language Support',
-  assignedTo: { name: 'Sophia Ren', email: 'sophia@example.com', avatar: 'https://i.pravatar.cc/40?img=18' },
-  createdBy: { name: 'Product Team', email: 'product@example.com', avatar: 'https://i.pravatar.cc/40?img=27' },
-  category: 'UI/UX',
-  priority: 'High',
-  status: 'In Progress',
-  description: 'Add i18n support with English, French, and German locales',
-  completedTasks: 1,
-  totalTasks: 5,
-  startDate: '18/03/25',
-  dueDate: '31/03/25'
-},
-{
-  title: 'Enable Dark Mode Theme',
-  assignedTo: { name: 'Jonas Clark', email: 'jonas@example.com', avatar: 'https://i.pravatar.cc/40?img=19' },
-  createdBy: { name: 'Design Team', email: 'design@example.com', avatar: 'https://i.pravatar.cc/40?img=28' },
-  category: 'UI/UX',
-  priority: 'Low',
-  status: 'On Hold',
-  description: 'Add toggle and styles for dark mode support',
-  completedTasks: 1,
-  totalTasks: 3,
-  startDate: '17/03/25',
-  dueDate: '29/03/25'
-},
-{
-  title: 'Fix Safari Compatibility',
-  assignedTo: { name: 'Amira Saleh', email: 'amira@example.com', avatar: 'https://i.pravatar.cc/40?img=20' },
-  createdBy: { name: 'QA Team', email: 'qa@example.com', avatar: 'https://i.pravatar.cc/40?img=29' },
-  category: 'UI/UX',
-  priority: 'Medium',
-  status: 'To Do',
-  description: 'Address layout issues in Safari 15 and above',
-  completedTasks: 0,
-  totalTasks: 2,
-  startDate: '22/03/25',
-  dueDate: '28/03/25'
-},
-{
-  title: 'Run Load Tests',
-  assignedTo: { name: 'Hassan Patel', email: 'hassan@example.com', avatar: 'https://i.pravatar.cc/40?img=21' },
-  createdBy: { name: 'Performance Team', email: 'perf@example.com', avatar: 'https://i.pravatar.cc/40?img=30' },
-  category: 'Testing',
-  priority: 'High',
-  status: 'To Do',
-  description: 'Use JMeter to simulate 1K+ concurrent users',
-  completedTasks: 0,
-  totalTasks: 2,
-  startDate: '24/03/25',
-  dueDate: '27/03/25'
-},
-{
-  title: 'Implement Feature Flagging',
-  assignedTo: { name: 'Ruby Trent', email: 'ruby@example.com', avatar: 'https://i.pravatar.cc/40?img=22' },
-  createdBy: { name: 'Product Owner', email: 'po@example.com', avatar: 'https://i.pravatar.cc/40?img=31' },
-  category: 'Backend',
-  priority: 'Medium',
-  status: 'In Progress',
-  description: 'Integrate LaunchDarkly for feature toggles',
-  completedTasks: 1,
-  totalTasks: 3,
-  startDate: '18/03/25',
-  dueDate: '27/03/25'
-},
-{
-  title: 'Research AI API Usage',
-  assignedTo: { name: 'Kenji Yamato', email: 'kenji@example.com', avatar: 'https://i.pravatar.cc/40?img=23' },
-  createdBy: { name: 'Innovation Team', email: 'innovation@example.com', avatar: 'https://i.pravatar.cc/40?img=32' },
-  category: 'Backend',
-  priority: 'Low',
-  status: 'On Hold',
-  description: 'Evaluate OpenAI and Cohere APIs for semantic search',
-  completedTasks: 0,
-  totalTasks: 2,
-  startDate: '25/03/25',
-  dueDate: '02/04/25'
-},
-{
-  title: 'Update Accessibility Labels',
-  assignedTo: { name: 'Paula Duran', email: 'paula@example.com', avatar: 'https://i.pravatar.cc/40?img=24' },
-  createdBy: { name: 'Compliance Team', email: 'compliance@example.com', avatar: 'https://i.pravatar.cc/40?img=33' },
-  category: 'UI/UX',
-  priority: 'Medium',
-  status: 'To Do',
-  description: 'Ensure all buttons and images have proper ARIA tags',
-  completedTasks: 0,
-  totalTasks: 2,
-  startDate: '23/03/25',
-  dueDate: '28/03/25'
-}
-,
-  
-  ...Array.from({ length: 100 }, (_, i): Task => ({
-    title: `Task Sample #${i + 5}`,
+  {
+    id: 't1',
+    title: 'Fix Login Redirect Bug',
+    description: 'Users are being redirected incorrectly after login, investigate and fix',
+    assignedTo: { 
+      id: 'u1', 
+      name: 'Eliza Herring', 
+      email: 'eliza@example.com', 
+      avatar: 'https://i.pravatar.cc/40?img=5' 
+    },
+    createdBy: { 
+      id: 'u2', 
+      name: 'QA Team', 
+      email: 'qa@example.com', 
+      avatar: 'https://i.pravatar.cc/40?img=14' 
+    },
+    category: 'UI/UX',
+    priority: 'High',
+    status: 'In Progress',
+    checklist: [
+      { id: 'c1', text: 'Reproduce the issue', completed: true },
+      { id: 'c2', text: 'Debug redirect logic', completed: true },
+      { id: 'c3', text: 'Implement fix', completed: false },
+      { id: 'c4', text: 'Write unit tests', completed: false }
+    ],
+    comments: [],
+    attachments: [
+      { 
+        id: 'a1', 
+        name: 'screenshot.png', 
+        url: '#', 
+        type: 'image/png', 
+        size: '2.4MB' 
+      }
+    ],
+    completedTasks: 2,
+    totalTasks: 4,
+    startDate: '18/03/25',
+    dueDate: '22/03/25',
+    createdAt: '2025-03-15T09:30:00Z',
+    updatedAt: '2025-03-17T14:45:00Z'
+  },
+  {
+    id: 't2',
+    title: 'Optimize Database Indexes',
+    description: 'Review and optimize indexes for faster query performance',
+    assignedTo: { 
+      id: 'u3', 
+      name: 'Derek Small', 
+      email: 'derek@example.com', 
+      avatar: 'https://i.pravatar.cc/40?img=6' 
+    },
+    createdBy: { 
+      id: 'u4', 
+      name: 'Tech Lead', 
+      email: 'tech@example.com', 
+      avatar: 'https://i.pravatar.cc/40?img=15' 
+    },
+    category: 'DevOps',
+    priority: 'Medium',
+    status: 'On Hold',
+    checklist: [
+      { id: 'c1', text: 'Identify slow queries', completed: false },
+      { id: 'c2', text: 'Analyze current indexes', completed: false },
+      { id: 'c3', text: 'Create new indexes', completed: false }
+    ],
+    comments: [],
+    attachments: [],
+    completedTasks: 0,
+    totalTasks: 3,
+    startDate: '21/03/25',
+    dueDate: '27/03/25',
+    createdAt: '2025-03-18T10:15:00Z',
+    updatedAt: '2025-03-18T10:15:00Z'
+  },
+  // Add more tasks with checklists as needed...
+  ...Array.from({ length: 5 }, (_, i): Task => ({
+    id: `t${i + 3}`,
+    title: `Sample Task ${i + 1}`,
+    description: `This is a sample task description ${i + 1}`,
     assignedTo: {
+      id: `u${i + 5}`,
       name: `User ${i + 1}`,
       email: `user${i + 1}@example.com`,
-      avatar: `https://i.pravatar.cc/40?img=${(i % 70) + 1}`,
+      avatar: `https://i.pravatar.cc/40?img=${i + 10}`
     },
     createdBy: {
-      name: `Manager ${i % 5 + 1}`,
-      email: `manager${i % 5 + 1}@example.com`,
-      avatar: `https://i.pravatar.cc/40?img=${(i % 10) + 20}`,
+      id: 'u1',
+      name: 'System',
+      email: 'system@example.com',
+      avatar: 'https://i.pravatar.cc/40?img=1'
     },
-    category: ['UI/UX', 'Backend', 'Documentation', 'DevOps', 'Testing'][i % 5] as Task['category'],
-    priority: ['High', 'Medium', 'Low'][i % 3] as Task['priority'],
-    status: ['To Do', 'In Progress', 'Done', 'On Hold'][i % 4] as Task['status'],
-    description: `Sample description for task #${i + 5}`,
-    completedTasks: i % 5,
-    totalTasks: 5,
+    category: ['UI/UX', 'Backend', 'Documentation'][i % 3] as any,
+    priority: ['High', 'Medium', 'Low'][i % 3] as any,
+    status: ['To Do', 'In Progress', 'Done'][i % 3] as any,
+    checklist: [
+      { id: `c1`, text: `Initial research`, completed: i > 1 },
+      { id: `c2`, text: `Implementation`, completed: i > 2 },
+      { id: `c3`, text: `Testing`, completed: i > 3 }
+    ],
+    comments: [],
+    attachments: [],
+    completedTasks: i > 1 ? 1 : 0,
+    totalTasks: 3,
     startDate: `${(i % 28) + 1}/03/25`,
-    dueDate: `${(i % 28) + 10}/03/25`
-  })),
+    dueDate: `${(i % 28) + 5}/03/25`,
+    createdAt: new Date(Date.now() - i * 86400000).toISOString(),
+    updatedAt: new Date(Date.now() - i * 43200000).toISOString()
+  }))
 ];

@@ -2,12 +2,12 @@ import React from "react";
 import type { Task } from "../data/types";
 import { getStatusColor } from "./TaskTable";
 
-interface TaskListViewProps {
+interface RecentTasksProps {
   tasks: Task[];
   onTaskSelect: (task: Task) => void;
 }
 
-const TaskListView: React.FC<TaskListViewProps> = ({ tasks, onTaskSelect }) => {
+const RecentTasks: React.FC<RecentTasksProps> = ({ tasks, onTaskSelect }) => {
   return (
     <table className="table table-bordered align-middle table-fixed w-100">
       <thead className="table-light">
@@ -17,12 +17,11 @@ const TaskListView: React.FC<TaskListViewProps> = ({ tasks, onTaskSelect }) => {
           <th className="d-none d-md-table-cell" style={{ width: "15%" }}>Category</th>
           <th className="d-none d-lg-table-cell" style={{ width: "10%" }}>Priority</th>
           <th className="d-none d-xl-table-cell" style={{ width: "15%" }}>Status</th>
-          <th className="d-none d-xl-table-cell" style={{ width: "5%" }}>Actions</th>
         </tr>
       </thead>
       <tbody>
         {tasks.map((task, idx) => (
-          <tr onClick={() => onTaskSelect(task)} key={idx}>
+          <tr onClick={() => onTaskSelect(task)} key={idx} style={{ cursor: 'pointer' }}>
             <td style={{ borderLeft: `5px solid ${getStatusColor(task.status)}`, borderRadius: "8px 0 0 8px" }}>
               <div>{task.title}</div>
               <small className="text-muted d-sm-none">By {task.createdBy.name}</small>
@@ -39,14 +38,15 @@ const TaskListView: React.FC<TaskListViewProps> = ({ tasks, onTaskSelect }) => {
             </td>
 
             <td className="d-none d-md-table-cell">{task.category}</td>
-            <td className="d-none d-lg-table-cell">{task.priority}</td>
-            <td className="d-none d-xl-table-cell">
-              <span className="status-pill" style={{ backgroundColor: getStatusColor(task.status) }}>{task.status}</span>
+            <td className="d-none d-lg-table-cell">
+              <span className={`badge bg-${task.priority === 'High' ? 'danger' : task.priority === 'Medium' ? 'warning' : 'success'}`}>
+                {task.priority}
+              </span>
             </td>
             <td className="d-none d-xl-table-cell">
-              <i className="bi bi-trash me-2 cursor-pointer"></i>
-              <i className="bi bi-eye me-2 cursor-pointer" onClick={() => onTaskSelect(task)}></i>
-              <i className="bi bi-three-dots"></i>
+              <span className="badge" style={{ backgroundColor: getStatusColor(task.status) }}>
+                {task.status}
+              </span>
             </td>
           </tr>
         ))}
@@ -55,4 +55,4 @@ const TaskListView: React.FC<TaskListViewProps> = ({ tasks, onTaskSelect }) => {
   );
 };
 
-export default TaskListView;
+export default RecentTasks;

@@ -7,6 +7,7 @@ import type { Task, Status } from "../data/types";
 import { allTasks } from "../data/allTasks";
 import TaskListView from "./TaskListView";
 import TaskCardView from "./TaskCardView";
+import TaskBoardDetails from "./TaskBoardDetails";
 
 export const getStatusColor = (status: Status): string => {
   switch (status) {
@@ -24,6 +25,9 @@ export default function TaskTable() {
   const [view, setView] = useState<"list" | "card">("list");
   const [page, setPage] = useState(1);
   const [tasksPerPage, setTasksPerPage] = useState(view === "list" ? 5 : 6); 
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const currentUser = { id: "u1", name: "You", avatar: "", email: "you@example.com" }; 
 
   const filteredTasks = allTasks.filter((task) => (
     (!filters.category || task.category === filters.category) &&
@@ -73,6 +77,7 @@ export default function TaskTable() {
     if (totalPages > 1) pages.push(totalPages);
     return pages;
   };
+
 
   return (
     <div className="task-table-wrapper px-3 py-4">
@@ -174,11 +179,26 @@ export default function TaskTable() {
         </div>
       </div>
 
-      {view === "list" ? (
-        <TaskListView tasks={paginatedTasks} />
-      ) : (
-        <TaskCardView tasks={paginatedTasks} />
-      )}
+        {view === "list" ? (
+      <TaskListView tasks={paginatedTasks} onTaskSelect={(t) => { setSelectedTask(t); setShowDetails(true); }} />
+    ) : (
+      <TaskCardView tasks={paginatedTasks} onTaskSelect={(t) => { setSelectedTask(t); setShowDetails(true); }} />
+    )}
+
+    {selectedTask && (
+      <TaskBoardDetails
+        task={selectedTask}
+        show={showDetails}
+        onClose={() => setShowDetails(false)}
+        currentUser={currentUser}
+        onUpdateTask={(updatedTask) => {
+          const updatedTasks = allTasks.map(task => 
+            task.id === updatedTask.id ? updatedTask : task
+          );
+          setSelectedTask(updatedTask);
+        }}
+/>
+    )}
 
       {totalPages > 1 && (
         <nav className="mt-3">
