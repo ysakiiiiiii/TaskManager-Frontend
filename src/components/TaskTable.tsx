@@ -5,12 +5,14 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 
 import type { Task, Status } from "../data/types";
 import { allTasks } from "../data/allTasks";
+import TaskListView from "./TaskListView";
+import TaskCardView from "./TaskCardView";
 
-const getStatusColor = (status: Status): string => {
+export const getStatusColor = (status: Status): string => {
   switch (status) {
-    case "To Do": return "";
+    case "To Do": return "#fcb329";
     case "In Progress": return "#dc3545";
-    case "Done": return "#86d254";
+    case "Done": return "#20b478";
     case "On Hold": return "#6610f2";
     default: return "#4caf50";
   }
@@ -21,7 +23,7 @@ export default function TaskTable() {
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"list" | "card">("list");
   const [page, setPage] = useState(1);
-  const [tasksPerPage, setTasksPerPage] = useState(10);
+  const [tasksPerPage, setTasksPerPage] = useState(view === "list" ? 5 : 6); 
 
   const filteredTasks = allTasks.filter((task) => (
     (!filters.category || task.category === filters.category) &&
@@ -42,13 +44,55 @@ export default function TaskTable() {
     setPage(1);
   };
 
+  const handleViewChange = (newView: "list" | "card") => {
+    setView(newView);
+    
+    setTasksPerPage(newView === "list" ? 5 : 6);
+    setPage(1);
+  };
+
+  const maxPageButtons = 5;
+
+  const getPageList = () => {
+    if (totalPages <= maxPageButtons) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const half = Math.floor(maxPageButtons / 2);
+    let start = Math.max(2, page - half + 1);
+    let end = Math.min(totalPages - 1, start + maxPageButtons - 3);
+
+    if (end - start < maxPageButtons - 3) {
+      start = Math.max(2, end - (maxPageButtons - 3));
+    }
+
+    const pages = [1];
+    if (start > 2) pages.push("…");
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < totalPages - 1) pages.push("…");
+    if (totalPages > 1) pages.push(totalPages);
+    return pages;
+  };
+
   return (
     <div className="task-table-wrapper px-3 py-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="font-poppins mb-0 fs-5 fs-md-4 fs-lg-3">Tasks</h4>
+        <h4 className="font-poppins mb-0 fs-5 fs-md-4 fs-lg-3">Search Filters</h4>
         <div>
-          <button className="btn btn-outline-secondary me-2" onClick={() => setView("list")}> <i className="bi bi-list"></i> </button>
-          <button className="btn btn-outline-secondary me-2" onClick={() => setView("card")}> <i className="bi bi-grid-3x3-gap"></i> </button>
+          <button 
+            className={`btn me-2 ${view === "list" ? "text-white" : "btn-outline-secondary"}`}
+            style={{ backgroundColor: view === "list" ? "#6a6dfb" : "" }}
+            onClick={() => handleViewChange("list")}
+          >
+            <i className="bi bi-list"></i> List
+          </button>
+          <button 
+            className={`btn ${view === "card" ? "text-white" : "btn-outline-secondary"}`}
+            style={{ backgroundColor: view === "card" ? "#6a6dfb" : "" }}
+            onClick={() => handleViewChange("card")}
+          >
+            <i className="bi bi-grid-3x3-gap"></i> Cards
+          </button>
         </div>
       </div>
 
@@ -82,14 +126,38 @@ export default function TaskTable() {
           </div>
         </div>
 
+        <div>
+          <hr className="border border-dark my-5" />
+        </div>
+
         {/* Bottom Row: Pagination + Search + Add */}
         <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
           <div>
-            <select className="form-select">
-              <option>5 per page</option>
-              <option>10 per page</option>
-              <option>20 per page</option>
-              <option>50 per page</option>
+            <select
+              className="form-select"
+              value={tasksPerPage}
+              onChange={(e) => {
+                const value = parseInt(e.target.value, 10);
+                setTasksPerPage(value);
+                setPage(1);
+              }}
+            >
+              {view === "list" ? (
+                <>
+                  <option value={5}>5 per page</option>
+                  <option value={10}>10 per page</option>
+                  <option value={20}>20 per page</option>
+                  <option value={50}>50 per page</option>
+                  <option value={0}>All</option>
+                </>
+              ) : (
+                <>
+                  <option value={6}>6 per page</option>
+                  <option value={12}>12 per page</option>
+                  <option value={18}>18 per page</option>
+                  <option value={0}>All</option>
+                </>
+              )}
             </select>
           </div>
 
@@ -101,72 +169,15 @@ export default function TaskTable() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <button className="btn btn-primary form-control">+ Add New Task</button>
+            <button className="btn form-control text-white" style={{backgroundColor: "#6a6dfb"}}>+ Add New Task</button>
           </div>
         </div>
       </div>
 
-
       {view === "list" ? (
-        <table className="table table-bordered align-middle table-fixed w-100">
-          <thead className="table-light">
-            <tr>
-              <th style={{ width: "25%" }}>Task Title</th>
-              <th className="d-none d-md-table-cell" style={{ width: "20%" }}>Assigned To</th>
-              <th className="d-none d-md-table-cell" style={{ width: "15%" }}>Category</th>
-              <th className="d-none d-md-table-cell" style={{ width: "10%" }}>Priority</th>
-              <th className="d-none d-md-table-cell" style={{ width: "15%" }}>Status</th>
-              <th className="d-none d-md-table-cell" style={{ width: "15%" }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedTasks.map((task, idx) => (
-              <tr key={idx}>
-                <td style={{ borderLeft: `5px solid ${getStatusColor(task.status)}`, borderRadius: "8px 0 0 8px" }}>
-                  <div>{task.title}</div>
-                  <small className="text-muted d-md-none">By {task.assignedTo.name}</small>
-                </td>
-                <td className="d-none d-md-table-cell">
-                  <div className="d-flex align-items-center gap-2">
-                    <img src={task.assignedTo.avatar} alt="avatar" className="rounded-circle" width="40" height="40" />
-                    <div>
-                      <div>{task.assignedTo.name}</div>
-                      <div className="text-muted" style={{ fontSize: "0.8rem" }}>{task.assignedTo.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="d-none d-md-table-cell">{task.category}</td>
-                <td className="d-none d-md-table-cell">{task.priority}</td>
-                <td className="d-none d-md-table-cell">
-                  <span className="status-pill" style={{ backgroundColor: getStatusColor(task.status) }}>{task.status}</span>
-                </td>
-                <td className="d-none d-md-table-cell">
-                  <i className="bi bi-trash me-2 cursor-pointer"></i>
-                  <i className="bi bi-eye me-2 cursor-pointer"></i>
-                  <i className="bi bi-three-dots"></i>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TaskListView tasks={paginatedTasks} />
       ) : (
-        <div className="row">
-          {paginatedTasks.map((task, idx) => (
-            <div key={idx} className="col-md-6 mb-3">
-              <div className="card h-100">
-                <div className="card-body">
-                  <h5 className="card-title">{task.title}</h5>
-                  <p className="card-subtitle text-muted mb-2">Created by {task.assignedTo.name}</p>
-                  <p className="mb-1"><strong>Category:</strong> {task.category}</p>
-                  <p className="mb-1"><strong>Priority:</strong> {task.priority}</p>
-                  <p className="mb-1">
-                    <strong>Status:</strong> <span className="status-pill" style={{ backgroundColor: getStatusColor(task.status) }}>{task.status}</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <TaskCardView tasks={paginatedTasks} />
       )}
 
       {totalPages > 1 && (
@@ -178,11 +189,19 @@ export default function TaskTable() {
             <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
               <button className="page-link" onClick={() => setPage(page - 1)}>&lsaquo;</button>
             </li>
-            {[...Array(totalPages)].map((_, i) => (
-              <li key={i} className={`page-item ${page === i + 1 ? "active" : ""}`}>
-                <button className="page-link" onClick={() => setPage(i + 1)}>{i + 1}</button>
-              </li>
-            ))}
+
+            {getPageList().map((p, i) =>
+              typeof p === "string" ? (
+                <li key={i} className="page-item disabled">
+                  <span className="page-link">…</span>
+                </li>
+              ) : (
+                <li key={i} className={`page-item ${page === p ? "active" : ""}`}>
+                  <button className="page-link" onClick={() => setPage(p)}>{p}</button>
+                </li>
+              )
+            )}
+
             <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
               <button className="page-link" onClick={() => setPage(page + 1)}>&rsaquo;</button>
             </li>
