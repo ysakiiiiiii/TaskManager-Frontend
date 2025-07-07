@@ -3,7 +3,7 @@ import TopNavbar from './TopNavbar';
 import '../styles/SidebarLayout.css';
 import TaskTable from './TaskTable';
 import AdminDashboard from '../pages/AdminDashboard';
-import TeamDashboard from './TeamMembersDashboard';
+import TeamDashboard from './TeamDashboard';
 import TeamMemberListView from './TeamMemberListView';
 
 const SidebarLayout: React.FC = () => {
