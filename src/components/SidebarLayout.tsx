@@ -3,6 +3,8 @@ import TopNavbar from './TopNavbar';
 import '../styles/SidebarLayout.css';
 import TaskTable from './TaskTable';
 import AdminDashboard from '../pages/AdminDashboard';
+import TeamDashboard from './TeamMembersDashboard';
+import TeamMemberListView from './TeamMemberListView';
 
 const SidebarLayout: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1200);
@@ -52,7 +54,7 @@ const SidebarLayout: React.FC = () => {
       <div className="content-area d-flex flex-column">
         <TopNavbar onToggleSidebar={toggleSidebar} />
         <div className="main-content flex-grow-1 overflow-auto px-3">
-          <AdminDashboard />
+          <TeamDashboard />
         </div>
       </div>
     </div>
