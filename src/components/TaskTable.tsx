@@ -80,6 +80,8 @@ export default function TaskTable() {
 
 
   return (
+    <div className="card border-0 shadow-sm">
+    <div className="card-body">
     <div className="task-table-wrapper px-3 py-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="font-poppins mb-0 fs-5 fs-md-4 fs-lg-3">Search Filters</h4>
@@ -231,6 +233,8 @@ export default function TaskTable() {
           </ul>
         </nav>
       )}
+    </div>
+    </div>
     </div>
   );
 }

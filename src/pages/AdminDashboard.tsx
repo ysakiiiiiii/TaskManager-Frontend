@@ -105,14 +105,14 @@ const Dashboard = () => {
   return (
     <div className="container-fluid">
       {/* Greeting Section */}
-      <div className="row mb-4">
+      <div className="row mb-5">
         <div className="col-md-12">
-          <div className="card border-0 shadow-sm">
+          <div className="card border-0 shadow-md rounded-4">
             <div className="card-body p-4">
               <div className="row align-items-center">
                 <div className="col-md-4">
-                  <h2 className="mb-1 fw-bold">Good Morning, Mike!</h2>
-                  <p className="text-muted mb-0">{formattedDate}</p>
+                  <h2 className="mb-1 fw-bold">Good Morning, Admin!</h2>
+                  <p className="text-muted mb-4">{formattedDate}</p>
                 </div>
                 <div className="col-md-8">
                   <div className="row g-3">
@@ -161,12 +161,12 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Section - Top Row */}
-      <div className="row mb-4">
+      <div className="row">
         {/* Task Distribution Pie Chart */}
         <div className="col-md-6 mb-4">
-          <div className="card h-100 border-0 shadow-sm">
+          <div className="card h-100 border-0 shadow-md rounded-4">
             <div className="card-body">
-              <h5 className="card-title">Task Distribution</h5>
+              <h5 className="card-title py-2">Task Distribution</h5>
               <div style={{ height: '300px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -195,9 +195,9 @@ const Dashboard = () => {
 
         {/* Task Priority Bar Chart */}
         <div className="col-md-6 mb-4">
-          <div className="card h-100 border-0 shadow-sm">
+          <div className="card h-100 border-0 shadow-md rounded-4">
             <div className="card-body">
-              <h5 className="card-title">Task Priority Levels</h5>
+              <h5 className="card-title py-2">Task Priority Levels</h5>
               <div style={{ height: '300px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={priorityData}>
@@ -222,9 +222,9 @@ const Dashboard = () => {
       <div className="row mb-4">
         {/* Task Category Bar Chart */}
         <div className="col-md-6 mb-4">
-          <div className="card h-100 border-0 shadow-sm">
+          <div className="card h-100 border-0 shadow-md rounded-4">
             <div className="card-body">
-              <h5 className="card-title">Task Categories</h5>
+              <h5 className="card-title py-2">Task Categories</h5>
               <div style={{ height: '300px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={categoryData}>
@@ -246,7 +246,7 @@ const Dashboard = () => {
 
         {/* Task History Line Chart */}
         <div className="col-md-6 mb-4">
-          <div className="card h-100 border-0 shadow-sm">
+          <div className="card h-100 border-0 shadow-md rounded-4">
             <div className="card-body">
               <h5 className="card-title">Task History</h5>
               <div style={{ height: '300px' }}>
