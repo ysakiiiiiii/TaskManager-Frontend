@@ -1,232 +1,159 @@
-import React, { useState } from "react";
-import { Table, Container, Button, Badge, Form, Image, Dropdown } from "react-bootstrap";
+import React from "react";
+import { Table, Badge, Dropdown } from "react-bootstrap";
+import type { User } from "../data/taskInterfaces";
+import { getAvatarUrl, getStatusColor, statusLabels } from "../utils/userUtils";
 
-interface TaskStatus {
-  id: number;
-  name: string;
+interface TeamMemberListViewProps {
+  users: User[];
+  onUserSelect: (user: User | null) => void;
+  toggleStatus: (id: string) => void;
+  onEdit: (user: User) => void;
+  onDelete: (id: string) => void;
+  selectedUserId?: string;
 }
 
-interface TaskItem {
-  id: number;
-  title: string;
-  description: string;
-  statusId: number;
-  status: TaskStatus;
-}
+const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({ 
+  users, 
+  onUserSelect,
+  toggleStatus,
+  onEdit,
+  onDelete,
+  selectedUserId
+}) => {
+  const [openDropdownId, setOpenDropdownId] = React.useState<string | null>(null);
+  const tableRef = React.useRef<HTMLTableElement>(null);
 
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  isActive: boolean;
-  role: string;
-  tasks: TaskItem[];
-}
-
-const statusLabels: Record<number, string> = {
-  1: "To Do",
-  2: "In Progress",
-  3: "Done",
-  4: "On Hold",
-};
-
-const getStatusColor = (status: string): string => {
-  switch (status) {
-    case "To Do": return "#fcb329";
-    case "In Progress": return "#0d6efd";
-    case "Done": return "#20b478";
-    case "On Hold": return "#6610f2";
-    default: return "#4caf50";
-  }
-};
-
-const teamMembers: User[] = [
-  {
-    id: "1",
-    firstName: "Dustin",
-    lastName: "Smith",
-    email: "dustin@timetoprogram.com",
-    isActive: true,
-    role: "Developer",
-    tasks: [
-      { id: 1, title: "Fix bug", description: "Resolve login issue", statusId: 2, status: { id: 2, name: "In Progress" } },
-      { id: 2, title: "Add feature", description: "Implement auth", statusId: 3, status: { id: 3, name: "Done" } },
-      { id: 5, title: "Code review", description: "Review PR #42", statusId: 1, status: { id: 1, name: "To Do" } }
-    ]
-  },
-  {
-    id: "2",
-    firstName: "Mary",
-    lastName: "Jane",
-    email: "mary@timetoprogram.com",
-    isActive: false,
-    role: "Designer",
-    tasks: [
-      { id: 3, title: "UI Review", description: "Review dashboard UI", statusId: 1, status: { id: 1, name: "To Do" } },
-      { id: 4, title: "Icon Set", description: "Design new icons", statusId: 4, status: { id: 4, name: "On Hold" } }
-    ]
-  },
-  {
-    id: "3",
-    firstName: "Alex",
-    lastName: "Johnson",
-    email: "alex@timetoprogram.com",
-    isActive: true,
-    role: "Product Manager",
-    tasks: [
-      { id: 6, title: "Roadmap", description: "Update Q3 roadmap", statusId: 2, status: { id: 2, name: "In Progress" } },
-      { id: 7, title: "User research", description: "Conduct interviews", statusId: 3, status: { id: 3, name: "Done" } },
-      { id: 8, title: "Metrics", description: "Analyze KPIs", statusId: 1, status: { id: 1, name: "To Do" } }
-    ]
-  }
-];
-
-const getAvatarUrl = (name: string) => {
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
-};
-
-const TeamMemberListView = () => {
-  const [users, setUsers] = useState<User[]>(teamMembers);
-
-  const toggleStatus = (id: string) => {
-    setUsers(users.map(user =>
-      user.id === id ? { ...user, isActive: !user.isActive } : user
-    ));
+  const handleDropdownToggle = (userId: string, isOpen: boolean) => {
+    setOpenDropdownId(isOpen ? userId : null);
   };
 
-  const StatusCountBadge = ({ count, statusId }: { count: number, statusId: number }) => {
-    const statusName = statusLabels[statusId];
-    const color = getStatusColor(statusName);
-    
-    return (
-      <div 
-        style={{ 
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '32px',
-          height: '32px',
-          borderRadius: '50%',
-          backgroundColor: `${color}20`,
-          color: color,
-          fontWeight: 'bold',
-          fontSize: '0.9rem',
-          border: `1px solid ${color}80`,
-          boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-        }}
-      >
-        {count}
-      </div>
-    );
-  };
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tableRef.current && !tableRef.current.contains(event.target as Node)) {
+        onUserSelect(null);
+        setOpenDropdownId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onUserSelect]);
 
   return (
-    <Container fluid className="py-4 px-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2 className="mb-1">Team Dashboard</h2>
-          <p className="text-muted mb-0">Track team members and their task progress</p>
-        </div>
-        <div>
-          <Button variant="primary" className="me-2">
-            <i className="bi bi-plus-lg me-2"></i> Add Member
-          </Button>
-          <Button variant="outline-primary">
-            <i className="bi bi-download me-2"></i> Export
-          </Button>
-        </div>
-      </div>
-
-      <div className="table-responsive" style={{ 
-        borderRadius: '0.5rem',
-        boxShadow: '0 0 0 1px rgba(0,0,0,0.1)',
-        overflowX: 'auto'
-      }}>
-        <Table hover className="mb-0 align-middle" style={{ minWidth: '900px' }}>
-          <thead className="table-light">
-            <tr>
-              <th style={{ width: '25%', minWidth: '200px' }}>Team Member</th>
-              <th style={{ width: '20%', minWidth: '180px' }}>Contact</th>
-              <th style={{ width: '10%', minWidth: '100px' }}>Status</th>
-              <th style={{ width: '10%', minWidth: '90px' }} className="text-center">To Do</th>
-              <th style={{ width: '10%', minWidth: '90px' }} className="text-center">In Progress</th>
-              <th style={{ width: '10%', minWidth: '90px' }} className="text-center">On Hold</th>
-              <th style={{ width: '10%', minWidth: '90px' }} className="text-center">Done</th>
-              <th style={{ width: '5%', minWidth: '50px' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((member) => (
-              <tr key={member.id}>
-                <td>
-                  <div className="d-flex align-items-center">
-                    <Image 
-                      src={getAvatarUrl(`${member.firstName} ${member.lastName}`)} 
-                      alt="avatar"
-                      roundedCircle
-                      width={42}
-                      height={42}
-                      className="me-3 border border-2 border-white shadow-sm"
-                    />
-                    <div>
-                      <div className="fw-semibold">{member.firstName} {member.lastName}</div>
-                      <div className="text-muted small">{member.role}</div>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div>
-                    <a href={`mailto:${member.email}`} className="text-decoration-none">
-                      {member.email}
-                    </a>
-                  </div>
-                </td>
-                <td>
-                  <Badge 
-                    bg={member.isActive ? "success" : "secondary"} 
-                    className="px-2 py-1 rounded-pill"
-                  >
-                    {member.isActive ? "Active" : "Inactive"}
-                  </Badge>
-                </td>
-                {[1, 2, 4, 3].map((statusId) => {
-                  const count = member.tasks.filter(task => task.statusId === statusId).length;
+    <table 
+      className="table table-bordered align-middle table-fixed w-100" 
+      ref={tableRef}
+    >
+      <thead className="table-light">
+        <tr>
+          <th style={{ width: "25%" }}>Member</th>
+          <th className="d-none d-sm-table-cell" style={{ width: "25%" }}>Email</th>
+          <th className="d-none d-md-table-cell"style={{ width: "10%" }}>Status</th>
+          <th className="d-none d-lg-table-cell"style={{ width: "30%" }}>Task Progress</th>
+          <th className="text-center" style={{ width: "10%" }}>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.map(user => (
+          <tr 
+            key={user.id} 
+            className={selectedUserId === user.id ? "table-primary" : ""}
+            onClick={(e) => {
+              const tag = (e.target as HTMLElement).tagName.toLowerCase();
+              if (["button", "a", "svg", "path", "i"].includes(tag) || (e.target as HTMLElement).closest('.dropdown')) {
+                return; 
+              }
+              onUserSelect(user);
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <td>
+              <div className="d-flex align-items-center gap-3">
+                <img 
+                  src={getAvatarUrl(`${user.firstName} ${user.lastName}`)}
+                  alt="avatar"
+                  className="rounded-circle"
+                  width={40}
+                  height={40}
+                />
+                <div>
+                  <div className="fw-semibold">{user.firstName} {user.lastName}</div>
+                  <div className="text-muted small">@{user.username}</div>
+                </div>
+              </div>
+            </td>
+            <td className="d-none d-sm-table-cell">
+              <a href={`mailto:${user.email}`} className="text-decoration-none">
+                {user.email}
+              </a>
+            </td>
+            <td className="d-none d-md-table-cell">
+              <Badge bg={user.isActive ? "success" : "secondary"}>
+                {user.isActive ? "Active" : "Inactive"}
+              </Badge>
+            </td>
+            <td className="d-none d-lg-table-cell">
+              <div className="d-flex gap-2 flex-wrap">
+                {[1, 2, 3, 4].map(statusId => {
+                  const count = user.tasks.filter(task => task.statusId === statusId).length;
+                  if (count === 0) return null;
+                  const color = getStatusColor(statusLabels[statusId]);
                   return (
-                    <td key={statusId} className="text-center">
-                      {count > 0 ? (
-                        <StatusCountBadge count={count} statusId={statusId} />
-                      ) : (
-                        <span className="text-muted">-</span>
-                      )}
-                    </td>
+                    <span 
+                      key={statusId}
+                      className="badge rounded-pill"
+                      style={{ backgroundColor: color }}
+                    >
+                      {statusLabels[statusId]}: {count}
+                    </span>
                   );
                 })}
-                <td>
-                  <Dropdown align="end">
-                    <Dropdown.Toggle variant="link" id="dropdown-actions" className="text-muted p-0">
-                      <i className="bi bi-three-dots-vertical"></i>
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      <Dropdown.Item href="#">
-                        <i className="bi bi-pencil-square me-2"></i>Edit
-                      </Dropdown.Item>
-                      <Dropdown.Item href="#">
-                        <i className="bi bi-person-lines-fill me-2"></i>View Profile
-                      </Dropdown.Item>
-                      <Dropdown.Divider />
-                      <Dropdown.Item href="#" className="text-danger">
-                        <i className="bi bi-trash me-2"></i>Remove
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
-    </Container>
+              </div>
+            </td>
+            <td className="text-end">
+              <div className="d-flex justify-content-center gap-2">
+                {/* Status Toggle */}
+               <button
+                className={`btn p-3 rounded-circle ${user.isActive ? 'text-danger' : 'text-success'}`}
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleStatus(user.id);
+                  }}
+                  aria-label={user.isActive ? 'Deactivate' : 'Activate'}
+                >
+                  <i className={`bi ${user.isActive ? 'bi-toggle-on' : 'bi-toggle-off'}`} style={{ fontSize: '1.5rem' }} />
+                </button>
+
+                {/* Edit */}
+                <button
+                  className="btn btn-sm p-2 rounded-circle text-primary"
+                  aria-label="Edit"
+                >
+                  <i className="bi bi-pencil" />
+                </button>
+
+                {/* Delete */}
+                <button
+                  className="btn btn-sm p-2 rounded-circle text-muted hover-danger"
+                  aria-label="Delete"
+                >
+                  <i className="bi bi-trash" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 };
 

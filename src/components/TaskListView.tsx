@@ -25,7 +25,7 @@ const TaskListView: React.FC<TaskListViewProps> = ({ tasks, onTaskSelect }) => {
           <tr onClick={() => onTaskSelect(task)} key={idx}>
             <td style={{ borderLeft: `5px solid ${getStatusColor(task.status)}`, borderRadius: "8px 0 0 8px" }}>
               <div>{task.title}</div>
-              <small className="text-muted d-sm-none">By {task.createdBy.name}</small>
+              <small className="text-muted">By {task.createdBy.name}</small>
             </td>
 
             <td className="d-none d-sm-table-cell">

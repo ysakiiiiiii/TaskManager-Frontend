@@ -1,0 +1,12 @@
+.hover-danger:hover {
+  color: var(--bs-danger) !important;
+  background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+.btn-sm.p-2 {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
