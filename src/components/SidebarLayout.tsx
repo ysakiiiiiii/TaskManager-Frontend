@@ -54,7 +54,7 @@ const SidebarLayout: React.FC = () => {
       <div className="content-area d-flex flex-column">
         <TopNavbar onToggleSidebar={toggleSidebar} />
         <div className="main-content flex-grow-1 overflow-auto px-3">
-          <TeamDashboard />
+          <TaskTable />
         </div>
       </div>
     </div>

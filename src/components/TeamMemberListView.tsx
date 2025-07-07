@@ -5,10 +5,11 @@ import { getAvatarUrl, getStatusColor, statusLabels } from "../utils/userUtils";
 
 interface TeamMemberListViewProps {
   users: User[];
-  onUserSelect: (user: User) => void;
+  onUserSelect: (user: User | null) => void;
   toggleStatus: (id: string) => void;
   onEdit: (user: User) => void;
   onDelete: (id: string) => void;
+  selectedUserId?: string;
 }
 
 const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({ 
@@ -16,23 +17,59 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
   onUserSelect,
   toggleStatus,
   onEdit,
-  onDelete
+  onDelete,
+  selectedUserId
 }) => {
+  const [openDropdownId, setOpenDropdownId] = React.useState<string | null>(null);
+  const tableRef = React.useRef<HTMLTableElement>(null);
+
+  const handleDropdownToggle = (userId: string, isOpen: boolean) => {
+    setOpenDropdownId(isOpen ? userId : null);
+  };
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tableRef.current && !tableRef.current.contains(event.target as Node)) {
+        onUserSelect(null);
+        setOpenDropdownId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onUserSelect]);
+
   return (
-    <table className="table table-bordered align-middle table-fixed w-100">
+    <table 
+      className="table table-bordered align-middle table-fixed w-100" 
+      ref={tableRef}
+    >
       <thead className="table-light">
         <tr>
           <th style={{ width: "25%" }}>Member</th>
-          <th style={{ width: "25%" }}>Email</th>
-          <th style={{ width: "15%" }}>Status</th>
-          <th style={{ width: "25%" }}>Task Progress</th>
-          <th style={{ width: "10%" }}>Actions</th>
+          <th className="d-none d-sm-table-cell" style={{ width: "25%" }}>Email</th>
+          <th className="d-none d-md-table-cell"style={{ width: "10%" }}>Status</th>
+          <th className="d-none d-lg-table-cell"style={{ width: "30%" }}>Task Progress</th>
+          <th className="text-center" style={{ width: "10%" }}>Actions</th>
         </tr>
       </thead>
       <tbody>
         {users.map(user => (
-          <tr key={user.id}>
-            <td onClick={() => onUserSelect(user)} style={{ cursor: 'pointer' }}>
+          <tr 
+            key={user.id} 
+            className={selectedUserId === user.id ? "table-primary" : ""}
+            onClick={(e) => {
+              const tag = (e.target as HTMLElement).tagName.toLowerCase();
+              if (["button", "a", "svg", "path", "i"].includes(tag) || (e.target as HTMLElement).closest('.dropdown')) {
+                return; 
+              }
+              onUserSelect(user);
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <td>
               <div className="d-flex align-items-center gap-3">
                 <img 
                   src={getAvatarUrl(`${user.firstName} ${user.lastName}`)}
@@ -47,18 +84,18 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
                 </div>
               </div>
             </td>
-            <td>
+            <td className="d-none d-sm-table-cell">
               <a href={`mailto:${user.email}`} className="text-decoration-none">
                 {user.email}
               </a>
             </td>
-            <td>
+            <td className="d-none d-md-table-cell">
               <Badge bg={user.isActive ? "success" : "secondary"}>
                 {user.isActive ? "Active" : "Inactive"}
               </Badge>
             </td>
-            <td>
-              <div className="d-flex gap-2">
+            <td className="d-none d-lg-table-cell">
+              <div className="d-flex gap-2 flex-wrap">
                 {[1, 2, 3, 4].map(statusId => {
                   const count = user.tasks.filter(task => task.statusId === statusId).length;
                   if (count === 0) return null;
@@ -75,36 +112,42 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
                 })}
               </div>
             </td>
-            <td>
-              <div className="d-flex align-items-center justify-content-end gap-2">
-                <button 
-                  className={`btn btn-sm ${user.isActive ? 'btn-outline-danger' : 'btn-outline-success'}`}
+            <td className="text-end">
+              <div className="d-flex justify-content-center gap-2">
+                {/* Status Toggle */}
+               <button
+                className={`btn p-3 rounded-circle ${user.isActive ? 'text-danger' : 'text-success'}`}
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     toggleStatus(user.id);
                   }}
-                  style={{ minWidth: '90px' }}
+                  aria-label={user.isActive ? 'Deactivate' : 'Activate'}
                 >
-                  {user.isActive ? 'Deactivate' : 'Activate'}
+                  <i className={`bi ${user.isActive ? 'bi-toggle-on' : 'bi-toggle-off'}`} style={{ fontSize: '1.5rem' }} />
                 </button>
-                <Dropdown>
-                  <Dropdown.Toggle 
-                    variant="light" 
-                    id="dropdown-basic" 
-                    className="p-1 d-flex align-items-center justify-content-center"
-                    style={{ width: '32px', height: '32px' }}
-                  >
-                    <i className="bi bi-three-dots-vertical"></i>
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu style={{ zIndex: 9999 }}>
-                    <Dropdown.Item onClick={() => onEdit(user)}>
-                      <i className="bi bi-pencil me-2"></i> Edit
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={() => onDelete(user.id)} className="text-danger">
-                      <i className="bi bi-trash me-2"></i> Delete
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
+
+                {/* Edit */}
+                <button
+                  className="btn btn-sm p-2 rounded-circle text-primary"
+                  aria-label="Edit"
+                >
+                  <i className="bi bi-pencil" />
+                </button>
+
+                {/* Delete */}
+                <button
+                  className="btn btn-sm p-2 rounded-circle text-muted hover-danger"
+                  aria-label="Delete"
+                >
+                  <i className="bi bi-trash" />
+                </button>
               </div>
             </td>
           </tr>

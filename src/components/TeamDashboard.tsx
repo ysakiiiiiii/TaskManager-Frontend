@@ -3,11 +3,11 @@ import { Button, Form } from "react-bootstrap";
 import TeamMemberCardView from "./TeamMemberCardView";
 import TeamMemberListView from "./TeamMemberListView";
 import { teamMembers, type User } from "../data/taskInterfaces";
+import '../styles/TeamDashboard.css';
 
 const TeamDashboard: React.FC = () => {
   const [users, setUsers] = useState<User[]>(teamMembers);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
   const [page, setPage] = useState(1);
@@ -21,15 +21,27 @@ const TeamDashboard: React.FC = () => {
     ));
   };
 
+  const handleEdit = (user: User) => {
+    // Implement edit functionality
+    console.log("Editing user:", user);
+    setSelectedUser(user);
+    // You might want to open a modal or form here
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      setUsers(users.filter(user => user.id !== id));
+    }
+  };
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = `${user.firstName} ${user.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
                          user.email.toLowerCase().includes(search.toLowerCase());
-    const matchesRole = !roleFilter || user.role === roleFilter;
     const matchesStatus = !statusFilter ||
                          (statusFilter === "Active" && user.isActive) ||
                          (statusFilter === "Inactive" && !user.isActive);
 
-    return matchesSearch && matchesRole && matchesStatus;
+    return matchesSearch && matchesStatus;
   });
 
   const paginatedUsers = tasksPerPage === 0
@@ -38,8 +50,7 @@ const TeamDashboard: React.FC = () => {
 
   const totalPages = tasksPerPage === 0 ? 1 : Math.ceil(filteredUsers.length / tasksPerPage);
 
-  const handleFilterChange = (key: keyof typeof filters, value: string) => {
-    if (key === "role") setRoleFilter(value);
+  const handleFilterChange = (key:"status", value: string) => {
     if (key === "status") setStatusFilter(value);
     setPage(1);
   };
@@ -65,7 +76,7 @@ const TeamDashboard: React.FC = () => {
       start = Math.max(2, end - (maxPageButtons - 3));
     }
 
-    const pages = [1];
+    const pages: (number | string)[] = [1];
     if (start > 2) pages.push("...");
     for (let i = start; i <= end; i++) pages.push(i);
     if (end < totalPages - 1) pages.push("...");
@@ -79,21 +90,21 @@ const TeamDashboard: React.FC = () => {
         <div className="task-table-wrapper px-3 py-4">
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h4 className="font-poppins mb-0 fs-5 fs-md-4 fs-lg-3">Team Members</h4>
-            <div>
-              <button 
-                className={`btn me-2 ${viewMode === "list" ? "text-white" : "btn-outline-secondary"}`}
-                style={{ backgroundColor: viewMode === "list" ? "#6a6dfb" : "" }}
+            <div className="d-flex flex-wrap gap-2">
+              <Button 
+                variant={viewMode === "list" ? "primary" : "outline-secondary"}
+                size="sm"
                 onClick={() => handleViewChange("list")}
               >
                 <i className="bi bi-list"></i> List
-              </button>
-              <button 
-                className={`btn ${viewMode === "card" ? "text-white" : "btn-outline-secondary"}`}
-                style={{ backgroundColor: viewMode === "card" ? "#6a6dfb" : "" }}
+              </Button>
+              <Button 
+                variant={viewMode === "card" ? "primary" : "outline-secondary"}
+                size="sm"
                 onClick={() => handleViewChange("card")}
               >
                 <i className="bi bi-grid-3x3-gap"></i> Cards
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -101,28 +112,14 @@ const TeamDashboard: React.FC = () => {
             {/* Top Row: Filters */}
             <div className="row g-2 mb-2">
               <div className="col-md">
-                <select 
-                  className="form-select" 
-                  value={roleFilter}
-                  onChange={(e) => handleFilterChange("role", e.target.value)}
-                >
-                  <option value="">Select Role</option>
-                  <option value="Developer">Developer</option>
-                  <option value="Designer">Designer</option>
-                  <option value="Manager">Manager</option>
-                  <option value="QA">QA</option>
-                </select>
-              </div>
-              <div className="col-md">
-                <select 
-                  className="form-select"
+                <Form.Select
                   value={statusFilter}
                   onChange={(e) => handleFilterChange("status", e.target.value)}
                 >
                   <option value="">Select Status</option>
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
-                </select>
+                </Form.Select>
               </div>
               <div className="col-md"></div> {/* Empty column for alignment */}
             </div>
@@ -132,10 +129,10 @@ const TeamDashboard: React.FC = () => {
             </div>
 
             {/* Bottom Row: Pagination + Search + Add */}
-            <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 
+                          justify-content-center justify-content-sm-between text-center">
               <div>
-                <select
-                  className="form-select"
+                <Form.Select
                   value={tasksPerPage}
                   onChange={(e) => {
                     const value = parseInt(e.target.value, 10);
@@ -159,24 +156,20 @@ const TeamDashboard: React.FC = () => {
                       <option value={0}>All</option>
                     </>
                   )}
-                </select>
+                </Form.Select>
               </div>
 
               <div className="d-flex align-items-center gap-2">
-                <input
+                <Form.Control
                   type="text"
-                  className="form-control"
                   placeholder="Search Members"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
-                <button className="btn form-control text-white" style={{backgroundColor: "#6a6dfb"}}>
-                  + Add New Member
-                </button>
               </div>
             </div>
           </div>
-
+          
           {viewMode === 'list' ? (
             <TeamMemberListView 
               users={paginatedUsers} 
@@ -184,6 +177,10 @@ const TeamDashboard: React.FC = () => {
                 setSelectedUser(user);
                 setShowDetails(true);
               }}
+              toggleStatus={toggleStatus}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              selectedUserId={selectedUser?.id}
             />
           ) : (
             <TeamMemberCardView 
@@ -192,6 +189,10 @@ const TeamDashboard: React.FC = () => {
                 setSelectedUser(user);
                 setShowDetails(true);
               }}
+              toggleStatus={toggleStatus}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              selectedUserId={selectedUser?.id}
             />
           )}
 
@@ -199,10 +200,10 @@ const TeamDashboard: React.FC = () => {
             <nav className="mt-3">
               <ul className="pagination justify-content-center">
                 <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                  <button className="page-link" onClick={() => setPage(1)}>&laquo;</button>
+                  <button className="page-link" onClick={() => setPage(1)} disabled={page === 1}>&laquo;</button>
                 </li>
                 <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                  <button className="page-link" onClick={() => setPage(page - 1)}>&lsaquo;</button>
+                  <button className="page-link" onClick={() => setPage(page - 1)} disabled={page === 1}>&lsaquo;</button>
                 </li>
 
                 {getPageList().map((p, i) =>
@@ -218,10 +219,10 @@ const TeamDashboard: React.FC = () => {
                 )}
 
                 <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
-                  <button className="page-link" onClick={() => setPage(page + 1)}>&rsaquo;</button>
+                  <button className="page-link" onClick={() => setPage(page + 1)} disabled={page === totalPages}>&rsaquo;</button>
                 </li>
                 <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
-                  <button className="page-link" onClick={() => setPage(totalPages)}>&raquo;</button>
+                  <button className="page-link" onClick={() => setPage(totalPages)} disabled={page === totalPages}>&raquo;</button>
                 </li>
               </ul>
             </nav>

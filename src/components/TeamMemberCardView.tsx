@@ -51,7 +51,7 @@ const TeamMemberCardView: React.FC<TeamMemberCardViewProps> = ({
                     <h6 className="mb-0">
                       {user.firstName} {user.lastName}
                     </h6>
-                    <div className="text-muted small">{user.role}</div>
+                    <div className="text-muted small">{user.username}</div>
                   </div>
                 </div>
                 <Button 
