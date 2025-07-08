@@ -10,3 +10,16 @@
   align-items: center;
   justify-content: center;
 }
+
+.table tbody tr.user-row {
+  transition: background-color 0.2s ease;
+}
+.table tbody tr.user-row:hover td {
+  background-color: #f0f2ff !important;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.user-row button {
+  pointer-events: auto;
+}

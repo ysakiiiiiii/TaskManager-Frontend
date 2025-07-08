@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import type { Task } from "../data/types";
-import { getStatusColor } from "./TaskTable";
+import { getStatusColor } from "../pages/TaskTable";
 
 interface RecentTasksProps {
   tasks: Task[];
@@ -8,7 +8,11 @@ interface RecentTasksProps {
 }
 
 const RecentTasks: React.FC<RecentTasksProps> = ({ tasks, onTaskSelect }) => {
-  const [filters, setFilters] = useState({ category: "", priority: "", status: "" });
+  const [filters, setFilters] = useState({
+    category: "",
+    priority: "",
+    status: "",
+  });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [tasksPerPage, setTasksPerPage] = useState(5);
@@ -29,10 +33,12 @@ const RecentTasks: React.FC<RecentTasksProps> = ({ tasks, onTaskSelect }) => {
     );
   }, [filters, search, tasks]);
 
-  const totalPages = tasksPerPage === 0 ? 1 : Math.ceil(filteredTasks.length / tasksPerPage);
-  const paginatedTasks = tasksPerPage === 0
-    ? filteredTasks
-    : filteredTasks.slice((page - 1) * tasksPerPage, page * tasksPerPage);
+  const totalPages =
+    tasksPerPage === 0 ? 1 : Math.ceil(filteredTasks.length / tasksPerPage);
+  const paginatedTasks =
+    tasksPerPage === 0
+      ? filteredTasks
+      : filteredTasks.slice((page - 1) * tasksPerPage, page * tasksPerPage);
 
   return (
     <div className="recent-tasks-wrapper px-3 py-4">
@@ -41,7 +47,10 @@ const RecentTasks: React.FC<RecentTasksProps> = ({ tasks, onTaskSelect }) => {
       {/* Filters */}
       <div className="row g-2 mb-3">
         <div className="col-md">
-          <select className="form-select" onChange={(e) => handleFilterChange("category", e.target.value)}>
+          <select
+            className="form-select"
+            onChange={(e) => handleFilterChange("category", e.target.value)}
+          >
             <option value="">Select Category</option>
             <option value="UI/UX">UI/UX</option>
             <option value="Backend">Backend</option>
@@ -49,7 +58,10 @@ const RecentTasks: React.FC<RecentTasksProps> = ({ tasks, onTaskSelect }) => {
           </select>
         </div>
         <div className="col-md">
-          <select className="form-select" onChange={(e) => handleFilterChange("priority", e.target.value)}>
+          <select
+            className="form-select"
+            onChange={(e) => handleFilterChange("priority", e.target.value)}
+          >
             <option value="">Select Priority</option>
             <option value="High">High</option>
             <option value="Medium">Medium</option>
@@ -57,7 +69,10 @@ const RecentTasks: React.FC<RecentTasksProps> = ({ tasks, onTaskSelect }) => {
           </select>
         </div>
         <div className="col-md">
-          <select className="form-select" onChange={(e) => handleFilterChange("status", e.target.value)}>
+          <select
+            className="form-select"
+            onChange={(e) => handleFilterChange("status", e.target.value)}
+          >
             <option value="">Select Status</option>
             <option value="To Do">To Do</option>
             <option value="In Progress">In Progress</option>
@@ -67,9 +82,9 @@ const RecentTasks: React.FC<RecentTasksProps> = ({ tasks, onTaskSelect }) => {
         </div>
       </div>
 
-        <div>
-          <hr className="border border-dark my-5" />
-        </div>
+      <div>
+        <hr className="border border-dark my-5" />
+      </div>
 
       {/* Search + Page Size */}
       <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
@@ -106,18 +121,37 @@ const RecentTasks: React.FC<RecentTasksProps> = ({ tasks, onTaskSelect }) => {
         <thead className="table-light">
           <tr>
             <th style={{ width: "30%" }}>Task Title</th>
-            <th className="d-none d-sm-table-cell" style={{ width: "25%" }}>Assigned To</th>
-            <th className="d-none d-md-table-cell" style={{ width: "15%" }}>Category</th>
-            <th className="d-none d-lg-table-cell" style={{ width: "10%" }}>Priority</th>
-            <th className="d-none d-xl-table-cell" style={{ width: "15%" }}>Status</th>
+            <th className="d-none d-sm-table-cell" style={{ width: "25%" }}>
+              Assigned To
+            </th>
+            <th className="d-none d-md-table-cell" style={{ width: "15%" }}>
+              Category
+            </th>
+            <th className="d-none d-lg-table-cell" style={{ width: "10%" }}>
+              Priority
+            </th>
+            <th className="d-none d-xl-table-cell" style={{ width: "15%" }}>
+              Status
+            </th>
           </tr>
         </thead>
         <tbody>
           {paginatedTasks.map((task, idx) => (
-            <tr onClick={() => onTaskSelect(task)} key={idx} style={{ cursor: 'pointer' }}>
-              <td style={{ borderLeft: `5px solid ${getStatusColor(task.status)}`, borderRadius: "8px 0 0 8px" }}>
+            <tr
+              onClick={() => onTaskSelect(task)}
+              key={idx}
+              style={{ cursor: "pointer" }}
+            >
+              <td
+                style={{
+                  borderLeft: `5px solid ${getStatusColor(task.status)}`,
+                  borderRadius: "8px 0 0 8px",
+                }}
+              >
                 <div>{task.title}</div>
-                <small className="text-muted d-sm-none">By {task.createdBy.name}</small>
+                <small className="text-muted d-sm-none">
+                  By {task.createdBy.name}
+                </small>
               </td>
               <td className="d-none d-sm-table-cell">
                 <div className="d-flex align-items-center gap-2">
@@ -130,18 +164,31 @@ const RecentTasks: React.FC<RecentTasksProps> = ({ tasks, onTaskSelect }) => {
                   />
                   <div>
                     <div>{task.assignedTo.name}</div>
-                    <div className="text-muted" style={{ fontSize: "0.8rem" }}>{task.assignedTo.email}</div>
+                    <div className="text-muted" style={{ fontSize: "0.8rem" }}>
+                      {task.assignedTo.email}
+                    </div>
                   </div>
                 </div>
               </td>
               <td className="d-none d-md-table-cell">{task.category}</td>
               <td className="d-none d-lg-table-cell">
-                <span className={`badge bg-${task.priority === 'High' ? 'danger' : task.priority === 'Medium' ? 'warning' : 'success'}`}>
+                <span
+                  className={`badge bg-${
+                    task.priority === "High"
+                      ? "danger"
+                      : task.priority === "Medium"
+                      ? "warning"
+                      : "success"
+                  }`}
+                >
                   {task.priority}
                 </span>
               </td>
               <td className="d-none d-xl-table-cell">
-                <span className="badge" style={{ backgroundColor: getStatusColor(task.status) }}>
+                <span
+                  className="badge"
+                  style={{ backgroundColor: getStatusColor(task.status) }}
+                >
                   {task.status}
                 </span>
               </td>
@@ -155,23 +202,37 @@ const RecentTasks: React.FC<RecentTasksProps> = ({ tasks, onTaskSelect }) => {
         <nav>
           <ul className="pagination justify-content-center">
             <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-              <button className="page-link" onClick={() => setPage(1)}>&laquo;</button>
+              <button className="page-link" onClick={() => setPage(1)}>
+                &laquo;
+              </button>
             </li>
             <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-              <button className="page-link" onClick={() => setPage(page - 1)}>&lsaquo;</button>
+              <button className="page-link" onClick={() => setPage(page - 1)}>
+                &lsaquo;
+              </button>
             </li>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
               <li key={p} className={`page-item ${page === p ? "active" : ""}`}>
-                <button className="page-link" onClick={() => setPage(p)}>{p}</button>
+                <button className="page-link" onClick={() => setPage(p)}>
+                  {p}
+                </button>
               </li>
             ))}
 
-            <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
-              <button className="page-link" onClick={() => setPage(page + 1)}>&rsaquo;</button>
+            <li
+              className={`page-item ${page === totalPages ? "disabled" : ""}`}
+            >
+              <button className="page-link" onClick={() => setPage(page + 1)}>
+                &rsaquo;
+              </button>
             </li>
-            <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
-              <button className="page-link" onClick={() => setPage(totalPages)}>&raquo;</button>
+            <li
+              className={`page-item ${page === totalPages ? "disabled" : ""}`}
+            >
+              <button className="page-link" onClick={() => setPage(totalPages)}>
+                &raquo;
+              </button>
             </li>
           </ul>
         </nav>
