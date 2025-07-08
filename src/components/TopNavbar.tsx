@@ -13,11 +13,6 @@ const TopNavbar: React.FC<Props> = ({ onToggleSidebar }) => {
           className="bi bi-list fs-4 cursor-pointer d-xl-none"
           onClick={onToggleSidebar}
         ></i>
-
-        <div className="search-box d-none d-md-flex align-items-center bg-light px-2 py-1 rounded">
-          <i className="bi bi-search me-2 text-muted"></i>
-          <span className="text-muted">Search [CTRL + K]</span>
-        </div>
       </div>
 
       <div className="d-flex align-items-center gap-3">
