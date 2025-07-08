@@ -1,0 +1,49 @@
+/* Floating label styles */
+.form-floating {
+  position: relative;
+}
+
+.floating-label {
+  position: absolute;
+  top: 1.625rem;
+  left: 0.75rem;
+  font-size: 1rem;
+  color: #6c757d;
+  transition: all 0.2s ease-out;
+  pointer-events: none;
+  transform-origin: left top;
+  padding: 0 0.25rem;
+  background-color: white;
+  z-index: 1;
+}
+
+.floating-label-focused {
+  transform: translateY(-1.25rem) scale(0.85);
+  color: #6a6dfb;
+}
+
+.form-control-lg ~ .floating-label {
+  left: 0.75rem;
+  font-size: 1rem;
+}
+
+/* Input icon styles */
+.input-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  z-index: 2;
+}
+
+/* Gradient background for card header */
+.gradient-bg {
+  background: linear-gradient(135deg, #6a6dfb 0%, #8a8ef0 100%);
+}
+
+/* Form control focus styles */
+.form-control:focus {
+  box-shadow: 0 0 0 0.25rem rgba(106, 109, 251, 0.25);
+  border-color: #6a6dfb;
+}
