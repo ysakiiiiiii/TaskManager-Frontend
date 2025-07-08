@@ -1,43 +1,57 @@
 import React from "react";
 import type { Task } from "../data/types";
-import { getStatusColor } from "./TaskTable";
+import { getStatusColor } from "../pages/TaskTable";
 
 interface TaskCardViewProps {
   tasks: Task[];
-  onTaskSelect: (task: Task) => void;  
+  onTaskSelect: (task: Task) => void;
 }
 
 const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks, onTaskSelect }) => {
   return (
     <div className="row">
       {tasks.map((task, idx) => (
-        <div onClick={() => onTaskSelect(task)} key={idx} className="col-md-6 col-lg-4 mb-4">
-          <div 
+        <div
+          onClick={() => onTaskSelect(task)}
+          key={idx}
+          className="col-md-6 col-lg-4 mb-4"
+        >
+          <div
             className="card h-100 shadow-sm p-3 transition-all"
             style={{
               backgroundColor: "#fff",
               borderLeft: `6px solid ${getStatusColor(task.status)}`,
               borderTopLeftRadius: "1rem",
               borderBottomLeftRadius: "1rem",
-              borderRight: '1px solid #dee2e6',
-              borderTop: '1px solid #dee2e6',
-              borderBottom: '1px solid #dee2e6',
-              minHeight: '200px',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              cursor: 'pointer',
+              borderRight: "1px solid #dee2e6",
+              borderTop: "1px solid #dee2e6",
+              borderBottom: "1px solid #dee2e6",
+              minHeight: "200px",
+              display: "flex",
+              flexDirection: "column",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              cursor: "pointer",
             }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "translateY(-4px)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.transform = "translateY(0)")
+            }
           >
             {/* Card header with badges*/}
-            <div className="d-flex align-items-center mb-3 flex-wrap gap-2" style={{ rowGap: '0.5rem' }}>
-              <span className="badge text-light" style={{ 
-                backgroundColor: "#078b83",
-                fontSize: '0.65rem',
-                padding: '0.25rem 0.4rem'
-              }}>
+            <div
+              className="d-flex align-items-center mb-3 flex-wrap gap-2"
+              style={{ rowGap: "0.5rem" }}
+            >
+              <span
+                className="badge text-light"
+                style={{
+                  backgroundColor: "#078b83",
+                  fontSize: "0.65rem",
+                  padding: "0.25rem 0.4rem",
+                }}
+              >
                 {task.category}
               </span>
               <span
@@ -48,7 +62,7 @@ const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks, onTaskSelect }) => {
                     ? "bg-warning text-dark"
                     : "bg-success"
                 }`}
-                style={{ fontSize: '0.65rem', padding: '0.25rem 0.4rem' }}
+                style={{ fontSize: "0.65rem", padding: "0.25rem 0.4rem" }}
               >
                 {task.priority}
               </span>
@@ -56,8 +70,8 @@ const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks, onTaskSelect }) => {
                 className="badge text-white"
                 style={{
                   backgroundColor: getStatusColor(task.status),
-                  fontSize: '0.65rem',
-                  padding: '0.25rem 0.4rem'
+                  fontSize: "0.65rem",
+                  padding: "0.25rem 0.4rem",
                 }}
               >
                 {task.status}
@@ -66,8 +80,10 @@ const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks, onTaskSelect }) => {
 
             {/* Task title and creator info*/}
             <div className="mb-3">
-              <h5 className="fw-semibold mb-2" style={{ fontSize: '0.95rem' }}>{task.title}</h5>
-              <div className="small text-muted" style={{ fontSize: '0.7rem' }}>
+              <h5 className="fw-semibold mb-2" style={{ fontSize: "0.95rem" }}>
+                {task.title}
+              </h5>
+              <div className="small text-muted" style={{ fontSize: "0.7rem" }}>
                 <div className="d-flex align-items-center">
                   <span className="me-1">Created by:</span>
                   <img
@@ -76,7 +92,7 @@ const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks, onTaskSelect }) => {
                     className="rounded-circle me-1 border"
                     width="20"
                     height="20"
-                    style={{ objectFit: 'cover' }}
+                    style={{ objectFit: "cover" }}
                   />
                   <span className="fw-medium">{task.createdBy.name}</span>
                 </div>
@@ -85,31 +101,45 @@ const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks, onTaskSelect }) => {
 
             {/* Task description */}
             <div className="mb-3">
-              <p className="text-muted small mb-0" style={{ 
-                fontSize: '0.75rem',
-                minHeight: '2.5em',
-                lineHeight: '1.3',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
-              }}>
+              <p
+                className="text-muted small mb-0"
+                style={{
+                  fontSize: "0.75rem",
+                  minHeight: "2.5em",
+                  lineHeight: "1.3",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                }}
+              >
                 {task.description || "No description provided..."}
               </p>
             </div>
 
             {/* Progress bar */}
             <div className="mb-3">
-              <div className="d-flex justify-content-between small" style={{ fontSize: '0.7rem' }}>
+              <div
+                className="d-flex justify-content-between small"
+                style={{ fontSize: "0.7rem" }}
+              >
                 <span>Progress:</span>
-                <span>{task.completedTasks || 0}/{task.totalTasks || 5}</span>
+                <span>
+                  {task.completedTasks || 0}/{task.totalTasks || 5}
+                </span>
               </div>
-              <div className="progress mt-1" style={{ height: "4px", backgroundColor: "#e9ecef" }}>
+              <div
+                className="progress mt-1"
+                style={{ height: "4px", backgroundColor: "#e9ecef" }}
+              >
                 <div
                   className="progress-bar"
                   style={{
-                    width: `${((task.completedTasks || 0) / (task.totalTasks || 5)) * 100}%`,
+                    width: `${
+                      ((task.completedTasks || 0) / (task.totalTasks || 5)) *
+                      100
+                    }%`,
                     backgroundColor: getStatusColor(task.status),
                   }}
                 ></div>
@@ -118,12 +148,19 @@ const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks, onTaskSelect }) => {
 
             {/* Dates*/}
             <div className="mb-3">
-              <div className="d-flex justify-content-between text-muted small" style={{ fontSize: '0.7rem' }}>
+              <div
+                className="d-flex justify-content-between text-muted small"
+                style={{ fontSize: "0.7rem" }}
+              >
                 <div>
-                  <div><strong>Start:</strong> {task.startDate || "16/03/25"}</div>
+                  <div>
+                    <strong>Start:</strong> {task.startDate || "16/03/25"}
+                  </div>
                 </div>
                 <div>
-                  <div><strong>Due:</strong> {task.dueDate || "31/03/25"}</div>
+                  <div>
+                    <strong>Due:</strong> {task.dueDate || "31/03/25"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -139,15 +176,18 @@ const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks, onTaskSelect }) => {
                       className="rounded-circle me-1 border"
                       width="24"
                       height="24"
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: "cover" }}
                     />
                     <span className="small">{user.name}</span>
                   </div>
                 ))}
               </div>
-              
+
               {task.attachments && (
-                <div className="d-flex align-items-center gap-1" style={{ fontSize: '0.7rem' }}>
+                <div
+                  className="d-flex align-items-center gap-1"
+                  style={{ fontSize: "0.7rem" }}
+                >
                   <i className="bi bi-paperclip"></i>
                   <span>{task.attachments.length}</span>
                 </div>

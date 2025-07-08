@@ -1,5 +1,5 @@
 import React from "react";
-import { Table, Badge, Dropdown } from "react-bootstrap";
+import { Table, Badge } from "react-bootstrap";
 import type { User } from "../data/taskInterfaces";
 import { getAvatarUrl, getStatusColor, statusLabels } from "../utils/userUtils";
 
@@ -20,54 +20,23 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
   onDelete,
   selectedUserId
 }) => {
-  const [openDropdownId, setOpenDropdownId] = React.useState<string | null>(null);
-  const tableRef = React.useRef<HTMLTableElement>(null);
-
-  const handleDropdownToggle = (userId: string, isOpen: boolean) => {
-    setOpenDropdownId(isOpen ? userId : null);
-  };
-
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (tableRef.current && !tableRef.current.contains(event.target as Node)) {
-        onUserSelect(null);
-        setOpenDropdownId(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [onUserSelect]);
-
   return (
-    <table 
-      className="table table-bordered align-middle table-fixed w-100" 
-      ref={tableRef}
-    >
+    <table className="table table-bordered align-middle table-fixed w-100">
       <thead className="table-light">
         <tr>
           <th style={{ width: "25%" }}>Member</th>
           <th className="d-none d-sm-table-cell" style={{ width: "25%" }}>Email</th>
-          <th className="d-none d-md-table-cell"style={{ width: "10%" }}>Status</th>
-          <th className="d-none d-lg-table-cell"style={{ width: "30%" }}>Task Progress</th>
+          <th className="d-none d-md-table-cell" style={{ width: "10%" }}>Status</th>
+          <th className="d-none d-lg-table-cell" style={{ width: "30%" }}>Task Progress</th>
           <th className="text-center" style={{ width: "10%" }}>Actions</th>
         </tr>
       </thead>
       <tbody>
         {users.map(user => (
-          <tr 
-            key={user.id} 
-            className={selectedUserId === user.id ? "table-primary" : ""}
-            onClick={(e) => {
-              const tag = (e.target as HTMLElement).tagName.toLowerCase();
-              if (["button", "a", "svg", "path", "i"].includes(tag) || (e.target as HTMLElement).closest('.dropdown')) {
-                return; 
-              }
-              onUserSelect(user);
-            }}
-            style={{ cursor: 'pointer' }}
+          <tr
+            key={user.id}
+            onClick={() => onUserSelect(user)}
+            className={`user-row ${selectedUserId === user.id ? 'selected-row' : ''}`}
           >
             <td>
               <div className="d-flex align-items-center gap-3">
@@ -114,9 +83,9 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
             </td>
             <td className="text-end">
               <div className="d-flex justify-content-center gap-2">
-                {/* Status Toggle */}
-               <button
-                className={`btn p-3 rounded-circle ${user.isActive ? 'text-danger' : 'text-success'}`}
+                {/* Toggle Status */}
+                <button
+                  className={`btn p-3 rounded-circle ${user.isActive ? 'text-danger' : 'text-success'}`}
                   style={{
                     width: '40px',
                     height: '40px',
@@ -137,6 +106,10 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
                 <button
                   className="btn btn-sm p-2 rounded-circle text-primary"
                   aria-label="Edit"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(user);
+                  }}
                 >
                   <i className="bi bi-pencil" />
                 </button>
@@ -145,6 +118,10 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
                 <button
                   className="btn btn-sm p-2 rounded-circle text-muted hover-danger"
                   aria-label="Delete"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(user.id);
+                  }}
                 >
                   <i className="bi bi-trash" />
                 </button>

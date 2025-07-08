@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import { 
-  Modal, 
-  Button, 
-  Form, 
-  Badge, 
-  Row, 
-  Col, 
-  Image, 
+import {
+  Modal,
+  Button,
+  Form,
+  Badge,
+  Row,
+  Col,
+  Image,
   ProgressBar,
   ListGroup,
-  Stack
+  Stack,
 } from "react-bootstrap";
-import { getStatusColor } from "./TaskTable";
+import { getStatusColor } from "../pages/TaskTable";
 import type { Task, Priority, ChecklistItem } from "../data/types";
 
 interface TaskBoardDetailsProps {
@@ -30,13 +30,15 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
   onUpdateTask,
 }) => {
   const [comment, setComment] = useState("");
-  const [editingChecklistId, setEditingChecklistId] = useState<string | null>(null);
+  const [editingChecklistId, setEditingChecklistId] = useState<string | null>(
+    null
+  );
   const [newChecklistText, setNewChecklistText] = useState("");
   const [isAddingChecklist, setIsAddingChecklist] = useState(false);
 
   const handleCommentSubmit = () => {
     if (!comment.trim()) return;
-    
+
     const newComment = {
       id: `c${Date.now()}`,
       user: currentUser,
@@ -54,12 +56,14 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
   };
 
   const toggleChecklistItem = (itemId: string) => {
-    const updatedChecklist = task.checklist.map(item => 
+    const updatedChecklist = task.checklist.map((item) =>
       item.id === itemId ? { ...item, completed: !item.completed } : item
     );
 
-    const completedCount = updatedChecklist.filter(item => item.completed).length;
-    
+    const completedCount = updatedChecklist.filter(
+      (item) => item.completed
+    ).length;
+
     const updatedTask = {
       ...task,
       checklist: updatedChecklist,
@@ -71,13 +75,13 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
   };
 
   const updateChecklistText = (itemId: string, newText: string) => {
-    const updatedChecklist = task.checklist.map(item => 
+    const updatedChecklist = task.checklist.map((item) =>
       item.id === itemId ? { ...item, text: newText } : item
     );
 
     onUpdateTask({
       ...task,
-      checklist: updatedChecklist
+      checklist: updatedChecklist,
     });
   };
 
@@ -87,13 +91,13 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
     const newItem: ChecklistItem = {
       id: `cl${Date.now()}`,
       text: newChecklistText,
-      completed: false
+      completed: false,
     };
 
     const updatedTask = {
       ...task,
       checklist: [...task.checklist, newItem],
-      totalTasks: task.checklist.length + 1
+      totalTasks: task.checklist.length + 1,
     };
 
     onUpdateTask(updatedTask);
@@ -102,8 +106,12 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
   };
 
   const deleteChecklistItem = (itemId: string) => {
-    const updatedChecklist = task.checklist.filter(item => item.id !== itemId);
-    const completedCount = updatedChecklist.filter(item => item.completed).length;
+    const updatedChecklist = task.checklist.filter(
+      (item) => item.id !== itemId
+    );
+    const completedCount = updatedChecklist.filter(
+      (item) => item.completed
+    ).length;
 
     const updatedTask = {
       ...task,
@@ -117,14 +125,18 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
 
   const getPriorityVariant = (priority: Priority) => {
     switch (priority) {
-      case "High": return "danger";
-      case "Medium": return "warning";
-      case "Low": return "success";
-      default: return "secondary";
+      case "High":
+        return "danger";
+      case "Medium":
+        return "warning";
+      case "Low":
+        return "success";
+      default:
+        return "secondary";
     }
   };
 
-  const completionPercentage = task.totalTasks 
+  const completionPercentage = task.totalTasks
     ? Math.round(((task.completedTasks || 0) / task.totalTasks) * 100)
     : 0;
 
@@ -136,9 +148,7 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
       <Modal.Body className="pt-1">
         <div className="d-flex flex-wrap gap-2 mb-3">
           <Badge bg="secondary">{task.category}</Badge>
-          <Badge bg={getPriorityVariant(task.priority)}>
-            {task.priority}
-          </Badge>
+          <Badge bg={getPriorityVariant(task.priority)}>{task.priority}</Badge>
           <Badge style={{ backgroundColor: getStatusColor(task.status) }}>
             {task.status}
           </Badge>
@@ -153,10 +163,10 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
               <div className="d-flex justify-content-between mb-2">
                 <span className="text-muted">Created by:</span>
                 <div className="d-flex align-items-center gap-2">
-                  <Image 
-                    src={task.createdBy.avatar} 
-                    roundedCircle 
-                    width={24} 
+                  <Image
+                    src={task.createdBy.avatar}
+                    roundedCircle
+                    width={24}
                     height={24}
                   />
                   <span>{task.createdBy.name}</span>
@@ -165,10 +175,10 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
               <div className="d-flex justify-content-between mb-2">
                 <span className="text-muted">Assigned to:</span>
                 <div className="d-flex align-items-center gap-2">
-                  <Image 
-                    src={task.assignedTo.avatar} 
-                    roundedCircle 
-                    width={24} 
+                  <Image
+                    src={task.assignedTo.avatar}
+                    roundedCircle
+                    width={24}
                     height={24}
                   />
                   <span>{task.assignedTo.name}</span>
@@ -192,10 +202,11 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
                 <div className="d-flex justify-content-between small mb-1">
                   <span>Completion:</span>
                   <span>
-                    {task.completedTasks || 0}/{task.totalTasks || 0} tasks ({completionPercentage}%)
+                    {task.completedTasks || 0}/{task.totalTasks || 0} tasks (
+                    {completionPercentage}%)
                   </span>
                 </div>
-                <ProgressBar 
+                <ProgressBar
                   now={completionPercentage}
                   variant="success"
                   style={{ height: "6px" }}
@@ -206,9 +217,9 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
                   <h6 className="fw-bold mt-4 mb-2">Attachments</h6>
                   <div className="d-flex flex-wrap gap-2">
                     {task.attachments.map((attachment) => (
-                      <a 
-                        key={attachment.id} 
-                        href={attachment.url} 
+                      <a
+                        key={attachment.id}
+                        href={attachment.url}
                         className="d-flex align-items-center gap-1 text-decoration-none"
                         target="_blank"
                         rel="noopener noreferrer"
@@ -228,15 +239,15 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
         <div className="mb-4">
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h6 className="fw-bold mb-0">Checklist</h6>
-            <Button 
-              variant="outline-primary" 
+            <Button
+              variant="outline-primary"
               size="sm"
               onClick={() => setIsAddingChecklist(true)}
             >
               <i className="bi bi-plus"></i> Add Item
             </Button>
           </div>
-          
+
           {isAddingChecklist && (
             <div className="d-flex gap-2 mb-3">
               <Form.Control
@@ -249,9 +260,9 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
               <Button variant="primary" size="sm" onClick={addChecklistItem}>
                 Add
               </Button>
-              <Button 
-                variant="outline-secondary" 
-                size="sm" 
+              <Button
+                variant="outline-secondary"
+                size="sm"
                 onClick={() => {
                   setIsAddingChecklist(false);
                   setNewChecklistText("");
@@ -265,33 +276,42 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
           <ListGroup>
             {task.checklist.length > 0 ? (
               task.checklist.map((item) => (
-                <ListGroup.Item key={item.id} className="d-flex align-items-center">
+                <ListGroup.Item
+                  key={item.id}
+                  className="d-flex align-items-center"
+                >
                   <Form.Check
                     type="checkbox"
                     checked={item.completed}
                     onChange={() => toggleChecklistItem(item.id)}
                     className="me-3"
                   />
-                  
+
                   {editingChecklistId === item.id ? (
                     <div className="d-flex flex-grow-1 gap-2">
                       <Form.Control
                         type="text"
                         value={item.text}
-                        onChange={(e) => updateChecklistText(item.id, e.target.value)}
+                        onChange={(e) =>
+                          updateChecklistText(item.id, e.target.value)
+                        }
                         onBlur={() => setEditingChecklistId(null)}
                         autoFocus
                       />
                     </div>
                   ) : (
-                    <div 
-                      className={`flex-grow-1 ${item.completed ? 'text-decoration-line-through text-muted' : ''}`}
+                    <div
+                      className={`flex-grow-1 ${
+                        item.completed
+                          ? "text-decoration-line-through text-muted"
+                          : ""
+                      }`}
                       onDoubleClick={() => setEditingChecklistId(item.id)}
                     >
                       {item.text}
                     </div>
                   )}
-                  
+
                   <Button
                     variant="outline-danger"
                     size="sm"
@@ -313,16 +333,19 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
         {/* Comments Section */}
         <div className="mb-4">
           <h6 className="fw-bold mb-3">Comments</h6>
-          <div className="bg-light p-3 rounded" style={{ maxHeight: "200px", overflowY: "auto" }}>
+          <div
+            className="bg-light p-3 rounded"
+            style={{ maxHeight: "200px", overflowY: "auto" }}
+          >
             {task.comments.length > 0 ? (
               task.comments.map((comment) => (
                 <div key={comment.id} className="mb-3 pb-2 border-bottom">
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <div className="d-flex align-items-center gap-2">
-                      <Image 
-                        src={comment.user.avatar} 
-                        roundedCircle 
-                        width={32} 
+                      <Image
+                        src={comment.user.avatar}
+                        roundedCircle
+                        width={32}
                         height={32}
                       />
                       <strong>{comment.user.name}</strong>
@@ -364,8 +387,8 @@ const TaskBoardDetails: React.FC<TaskBoardDetailsProps> = ({
             <Button variant="outline-secondary" onClick={() => setComment("")}>
               Cancel
             </Button>
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               onClick={handleCommentSubmit}
               disabled={!comment.trim()}
             >
