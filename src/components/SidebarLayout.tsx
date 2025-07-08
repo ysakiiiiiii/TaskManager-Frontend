@@ -27,40 +27,61 @@ const SidebarLayout: React.FC = () => {
     <div className="layout-container">
       {/* Sidebar */}
       <div
-        className={`sidebar d-flex flex-column p-2 ${
+        className={`sidebar align-items-center d-flex flex-column p-2 ${
           isMobile ? (isSidebarOpen ? 'open' : '') : 'collapsed'
         }`}
       >
-        <div className="sidebar-logo mb-4 d-flex align-items-center gap-2 px-2">
-          <img src="/logo.png" alt="Logo" width="28" />
-          {!isMobile && <span className="fw-bold fs-5">Tasky</span>}
+        <div className="sidebar-logo mb-4 d-flex px-2 pt-5">
+          <img src="/logov1.png" alt="Logo" width="40" />
+          {!isMobile && <span className="fw-bold fs-4">TASKY</span>}
         </div>
-        <a href="#" className="nav-link d-flex align-items-center gap-3 mb-3">
+
+        <hr className="w-100 border-top border-dark my-3" />
+
+        <a href="#" className="nav-link d-flex align-items-center gap-3 mb-3 ps-1">
           <div
-            className="icon-sidebar d-flex align-items-center justify-content-center bg-white rounded"
+            className="icon-sidebar bsc-icon d-flex align-items-center justify-content-center bg-white rounded"
             style={{ width: '44px', height: '44px' }}
           >
             <i className="bi bi-layers" style={{ fontSize: '1.2rem'}}></i>
           </div>
-          <span className="text-sidebar">Dashboard</span>
+          <span className="text-sidebar bsc-span">Dashboard</span>
         </a>
-        <a href="#" className="nav-link d-flex align-items-center gap-3 mb-3">
+        <a href="#" className="nav-link d-flex align-items-center gap-3 mb-3 ps-1">
           <div
-            className="icon-sidebar d-flex align-items-center justify-content-center bg-white rounded"
+            className="icon-sidebar bsc-icon d-flex align-items-center justify-content-center bg-white rounded"
             style={{ width: '44px', height: '44px' }}
           >
             <i className="bi bi-journal-bookmark-fill" style={{ fontSize: '1.2rem'}}></i>
           </div>
-          <span className="text-sidebar">Tasks</span>
+          <span className="text-sidebar bsc-span">Tasks</span>
         </a>
-        <a href="#" className="nav-link d-flex align-items-center gap-3 mb-3">
+        <a href="#" className="nav-link d-flex align-items-center gap-3 mb-3 ps-1">
           <div
-            className="icon-sidebar d-flex align-items-center justify-content-center bg-white rounded"
+            className="icon-sidebar bsc-icon d-flex align-items-center justify-content-center bg-white rounded"
             style={{ width: '44px', height: '44px' }}
           >
             <i className="bi bi-person-rolodex" style={{ fontSize: '1.2rem'}}></i>
           </div>
-          <span className="text-sidebar">Users</span>
+          <span className="text-sidebar bsc-span">Users</span>
+        </a>
+        <a href="#" className="nav-link d-flex align-items-center gap-3 mb-3 ps-1">
+          <div
+            className="icon-sidebar bsc-icon d-flex align-items-center justify-content-center bg-white rounded"
+            style={{ width: '44px', height: '44px' }}
+          >
+            <i className="bi bi-person-gear" style={{ fontSize: '1.2rem'}}></i>
+          </div>
+          <span className="text-sidebar bsc-span">Account</span>
+        </a>
+        <a href="#" className="nav-link logout-link d-flex align-items-center gap-3 mb-3 ps-1">
+          <div
+            className="icon-sidebar logout-icon d-flex align-items-center justify-content-center bg-white rounded"
+            style={{ width: '44px', height: '44px' }}
+          >
+            <i className="bi bi-box-arrow-right" style={{ fontSize: '1.2rem'}}></i>
+          </div>
+          <span className="text-sidebar logout-span">Logout</span>
         </a>
       </div>
 
