@@ -67,9 +67,12 @@ const Dashboard = () => {
     categoryCounts[task.category]++;
     
     // Overdue tasks
-    const dueDateParts = task.dueDate.split('/');
-    const dueDate = new Date(`20${dueDateParts[2]}-${dueDateParts[1]}-${dueDateParts[0]}`);
-    if (dueDate < today && task.status !== 'Done') overdueCount++;
+    const dueDateParts = task.dueDate?.split('/');
+    if (dueDateParts && dueDateParts.length === 3) {
+      const dueDate = new Date(`20${dueDateParts[2]}-${dueDateParts[1]}-${dueDateParts[0]}`);
+      if (dueDate < today && task.status !== 'Done') overdueCount++;
+    }
+
   });
 
   // Convert status counts to chart data (grouping Pending statuses)
@@ -94,7 +97,12 @@ const Dashboard = () => {
   const completionRate = totalTasks > 0 ? Math.round((statusCounts['Done'] / totalTasks) * 100) : 0;
 
   // Format today's date
-  const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  };
   const formattedDate = today.toLocaleDateString('en-US', options);
 
   // Get recent tasks (last 5)
@@ -178,10 +186,10 @@ const Dashboard = () => {
                       outerRadius={80}
                       paddingAngle={2}
                       dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                     >
                       {statusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
+                        <Cell key={`cell-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value) => [`${value} tasks`, 'Count']} />
@@ -207,7 +215,7 @@ const Dashboard = () => {
                     <Tooltip formatter={(value) => [`${value} tasks`, 'Count']} />
                     <Bar dataKey="count" name="Tasks" radius={[4, 4, 0, 0]}>
                       {priorityData.map((entry, index) => (
-                        <Cell key={`bar-${index}`} fill={COLORS[entry.name]} />
+                        <Cell key={`bar-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -234,7 +242,7 @@ const Dashboard = () => {
                     <Tooltip formatter={(value) => [`${value} tasks`, 'Count']} />
                     <Bar dataKey="count" name="Tasks" radius={[4, 4, 0, 0]}>
                       {categoryData.map((entry, index) => (
-                        <Cell key={`bar-${index}`} fill={COLORS[entry.name]} />
+                        <Cell key={`bar-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} />
                       ))}
                     </Bar>
                   </BarChart>

@@ -1,10 +1,19 @@
-import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import SidebarLayout from './components/SidebarLayout';
-import TaskTable from './pages/TaskTable';
-import Dashboard from './pages/AdminDashboard';
+import LoginPage from './pages/LoginForm';
+import RegisterForm from './pages/RegisterForm';
 
 function App() {
-  return <SidebarLayout />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* <Route path="/" element={<Navigate to="/login" replace />} /> */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterForm />} />
+        <Route path="/*" element={<SidebarLayout />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
