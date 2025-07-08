@@ -17,7 +17,7 @@ const TaskListView: React.FC<TaskListViewProps> = ({ tasks, onTaskSelect }) => {
           <th className="d-none d-md-table-cell" style={{ width: "15%" }}>Category</th>
           <th className="d-none d-lg-table-cell" style={{ width: "10%" }}>Priority</th>
           <th className="d-none d-xl-table-cell" style={{ width: "15%" }}>Status</th>
-          <th className="d-none d-xl-table-cell" style={{ width: "5%" }}>Actions</th>
+          <th style={{ width: "5%" }}>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -43,10 +43,24 @@ const TaskListView: React.FC<TaskListViewProps> = ({ tasks, onTaskSelect }) => {
             <td className="d-none d-xl-table-cell">
               <span className="status-pill" style={{ backgroundColor: getStatusColor(task.status) }}>{task.status}</span>
             </td>
-            <td className="d-none d-xl-table-cell">
-              <i className="bi bi-trash me-2 cursor-pointer"></i>
-              <i className="bi bi-eye me-2 cursor-pointer" onClick={() => onTaskSelect(task)}></i>
-              <i className="bi bi-three-dots"></i>
+            <td>
+             <div className="d-flex justify-content-center gap-2">
+              {/* Edit */}
+                <button
+                  className="btn btn-sm p-2 rounded-circle text-primary hover-edit"
+                  aria-label="Edit"
+                >
+                  <i className="bi bi-pencil" onClick={() => onTaskSelect(task)}></i>
+                </button>
+
+                {/* Delete */}
+                <button
+                  className="btn btn-sm p-2 rounded-circle text-muted hover-danger"
+                  aria-label="Delete"
+                >
+                  <i className="bi bi-trash" />
+                </button>
+              </div>
             </td>
           </tr>
         ))}

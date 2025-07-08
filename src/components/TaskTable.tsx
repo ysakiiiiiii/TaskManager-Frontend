@@ -107,7 +107,7 @@ export default function TaskTable() {
         {/* Top Row: Filters */}
         <div className="row g-2 mb-2">
           <div className="col-md">
-            <select className="form-select" onChange={(e) => handleFilterChange("category", e.target.value)}>
+            <select className="form-select form-select-sm" onChange={(e) => handleFilterChange("category", e.target.value)}>
               <option value="">Select Category</option>
               <option value="UI/UX">UI/UX</option>
               <option value="Backend">Backend</option>
@@ -115,7 +115,7 @@ export default function TaskTable() {
             </select>
           </div>
           <div className="col-md">
-            <select className="form-select" onChange={(e) => handleFilterChange("priority", e.target.value)}>
+            <select className="form-select form-select-sm" onChange={(e) => handleFilterChange("priority", e.target.value)}>
               <option value="">Select Priority</option>
               <option value="High">High</option>
               <option value="Medium">Medium</option>
@@ -123,7 +123,7 @@ export default function TaskTable() {
             </select>
           </div>
           <div className="col-md">
-            <select className="form-select" onChange={(e) => handleFilterChange("status", e.target.value)}>
+            <select className="form-select form-select-sm" onChange={(e) => handleFilterChange("status", e.target.value)}>
               <option value="">Select Status</option>
               <option value="To Do">To Do</option>
               <option value="In Progress">In Progress</option>

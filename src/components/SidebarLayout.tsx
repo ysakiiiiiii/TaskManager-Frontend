@@ -33,10 +33,10 @@ const SidebarLayout: React.FC = () => {
       >
         <div className="sidebar-logo mb-4 d-flex px-2 pt-5">
           <img src="/logov1.png" alt="Logo" width="40" />
-          {!isMobile && <span className="fw-bold fs-4">TASKY</span>}
+           <span className="fw-bold fs-4">TASKY</span>
         </div>
 
-        <hr className="w-100 border-top border-dark my-3" />
+        <hr className="w-100 border-top border-dark mb-4" />
 
         <a href="#" className="nav-link d-flex align-items-center gap-3 mb-3 ps-1">
           <div
