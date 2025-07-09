@@ -208,20 +208,34 @@ export default function TaskTable() {
                 </select>
               </div>
 
-              <div className="d-flex align-items-center gap-2">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search User"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                <button
-                  className="btn form-control text-white"
-                  style={{ backgroundColor: "#6a6dfb" }}
-                >
-                  + Add New Task
-                </button>
+             <div className="row g-2">
+                <div className="col-12 col-md-4">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search User"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+
+                <div className="col-12 col-md-4">
+                  <button
+                    className="btn btn-primary w-100 text-white"
+                    style={{ backgroundColor: "#6a6dfb", whiteSpace: "nowrap" }}
+                  >
+                    + Add New Task
+                  </button>
+                </div>
+
+                <div className="col-12 col-md-4">
+                  <button
+                    className="btn btn-primary w-100 text-white"
+                    style={{ backgroundColor: "#6a6dfb", whiteSpace: "nowrap" }}
+                  >
+                    + Add New Category
+                  </button>
+                </div>
               </div>
             </div>
           </div>

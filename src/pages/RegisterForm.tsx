@@ -1,6 +1,6 @@
 // src/components/RegisterForm.tsx
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import api from '../api/axios'; 
 import { 
   Form, 
   Button, 
@@ -11,7 +11,7 @@ import {
   Spinner,
   Stack
 } from 'react-bootstrap';
-import { motion } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 import { User, Mail, Lock, Shield } from 'react-feather';
 import { Link } from 'react-router-dom';
 import PrivacyTermsModal from '../components/PrivacyTermsModal';
@@ -36,10 +36,13 @@ const RegisterForm: React.FC = () => {
     agree: false,
   });
 
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string[] | null>(null);
+  const [shakeKey, setShakeKey] = useState(0);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const alertControls = useAnimation();
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -53,47 +56,58 @@ const RegisterForm: React.FC = () => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    
+
     if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
+      setError(['Passwords do not match']);
       return;
     }
 
     if (!form.agree) {
-      setError('You must agree to the privacy policy and terms.');
+      setError(['You must agree to the privacy policy and terms.']);
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await axios.post('https://localhost:7179/api/User/Register', {
+      const response = await api.post('/User/Register', {
         firstName: form.firstName,
         lastName: form.lastName,
         username: form.username,
         password: form.password,
       });
 
-      if (response.data.success) {
+      if (response.status === 400 && response.data?.errors) {
+        const registerErrors = Object.values(response.data.errors).flat() as string[];
+        setError(registerErrors);
+        setShakeKey(prev => prev + 1);
+      } else if (response.data.success) {
         setSuccess('Registration successful! Redirecting to login...');
         setTimeout(() => {
           window.location.href = '/login';
-        }, 2000);
+        }, 1000);
       } else {
-        setError(response.data.message || 'Registration failed');
+        setError(['Registration failed']);
+        setShakeKey(prev => prev + 1);
       }
-    } catch (err: any) {
-      console.error('Registration error:', err.response);
-      const apiError = err.response?.data;
-      if (Array.isArray(apiError?.errors)) {
-        setError(apiError.errors.join('\n'));
-      } else {
-        setError(apiError?.message || 'An unexpected error occurred.');
-      }
+
+    } catch (err) {
+      setError(['An unexpected error occurred.']);
+      setShakeKey(prev => prev + 1);
     } finally {
       setLoading(false);
     }
   };
+
+
+  useEffect(() => {
+    alertControls.start({
+      x: [0, -10, 10, -10, 10, 0],
+      transition: { duration: 0.5 },
+    });
+  }, [shakeKey]);
+
+
 
   return (
     <motion.div
@@ -116,17 +130,17 @@ const RegisterForm: React.FC = () => {
             </motion.div>
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <Alert variant="danger" className="border-0 rounded-3">
-                  {error.split('\n').map((line, i) => (
-                    <div key={i}>{line}</div>
-                  ))}
-                </Alert>
+              <motion.div animate={alertControls}>
+              <Alert variant="danger" className="border-0 rounded-3 small">
+                  <ul className="mb-0 ps-3">
+                    {error.map((msg, i) => (
+                      <li key={i}>{msg}</li>
+                    ))}
+                  </ul> 
+              </Alert>
               </motion.div>
             )}
+
             {success && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}

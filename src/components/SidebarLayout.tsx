@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Link, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 import TopNavbar from "./TopNavbar";
 import "../styles/SidebarLayout.css";
 import TaskTable from "../pages/TaskTable";
@@ -9,9 +9,7 @@ import AccountSettings from "../pages/AccountSettings";
 import ProtectedRoute from "../routes/ProtectedRoute";
 import UserDashboard from "../pages/UserDashboard";
 
-// Mock auth context - in a real app you'd have proper auth context/provider
 const useAuth = () => {
-  // This is just for demonstration - replace with your actual auth logic
   const [user, setUser] = useState({
     role: 'user',
     isAuthenticated: true
@@ -29,6 +27,7 @@ const SidebarLayout: React.FC = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const { role, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation(); 
 
   useEffect(() => {
     const handleResize = () => {
@@ -41,11 +40,19 @@ const SidebarLayout: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+   useEffect(() => {
+    const contentArea = document.querySelector('.main-content');
+    if (contentArea) {
+      contentArea.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [location.pathname]);
+
+
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
   const handleLogout = () => {
     logout();
-    navigate('/login'); // Redirect to login page after logout
+    navigate('/login');
   };
 
   if (!isAuthenticated) {
