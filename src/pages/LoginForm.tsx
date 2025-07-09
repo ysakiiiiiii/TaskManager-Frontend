@@ -1,20 +1,20 @@
 // src/components/LoginForm.tsx
-import React, { useState } from 'react';
-import axios from 'axios';
-import { 
-  Form, 
-  Button, 
-  Alert, 
-  Container, 
-  Card, 
-  Spinner,
+import React, { useState, useEffect } from 'react';
+import api from '../api/axios';
+import {
+  Form,
+  Button,
+  Alert,
+  Container,
+  Card,
   FloatingLabel,
-  Stack 
+  Spinner,
+  Stack
 } from 'react-bootstrap';
-import { motion } from 'framer-motion';
-import { Lock, Mail } from 'react-feather';
-import '../styles/LoginForm.css';
+import { motion, useAnimation } from 'framer-motion';
+import { Mail, Lock } from 'react-feather';
 import { Link } from 'react-router-dom';
+import '../styles/LoginForm.css';
 
 interface LoginFormState {
   username: string;
@@ -23,13 +23,15 @@ interface LoginFormState {
 
 const LoginForm: React.FC = () => {
   const [form, setForm] = useState<LoginFormState>({ username: '', password: '' });
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string[] | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [shakeKey, setShakeKey] = useState(0);
+  const alertControls = useAnimation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,41 +41,45 @@ const LoginForm: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('https://localhost:7179/api/User/Login', form);
+      const response = await api.post('/User/Login', form);
 
       if (response.data.success) {
         setSuccess('Login successful! Redirecting...');
-        // Store token if needed
         localStorage.setItem('authToken', response.data.token);
-        // Redirect after delay
-        setTimeout(() => window.location.href = '/dashboard', 1500);
+        setTimeout(() => (window.location.href = '/dashboard'), 1500);
       } else {
-        setError(response.data.message || 'Login failed');
-      }
-    } catch (err: any) {
+          const errors = response.data.errors ?? [response.data.message ?? 'Login failed'];
+          setError(errors);
+          setShakeKey(prev => prev + 1);
+        }
+      } catch (err: any) {
       if (err.response?.data?.errors) {
-        setError(err.response.data.errors.join(', '));
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
+        setError(err.response.data.errors);
       } else {
-        setError('Server error occurred');
+        setError(['Server error occurred']);
       }
+      setShakeKey(prev => prev + 1);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (shakeKey > 0) {
+      alertControls.start({
+        x: [0, -10, 10, -10, 10, 0],
+        transition: { duration: 0.5 },
+      });
+    }
+  }, [shakeKey]);
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
       <Container className="d-flex justify-content-center align-items-center min-vh-100 px-3">
         <Card className="shadow-lg border-0 rounded-4 overflow-hidden" style={{ width: '100%', maxWidth: 450 }}>
           <div className="gradient-bg" style={{ height: '8px' }}></div>
           <Card.Body className="p-4 p-md-5">
-            <motion.div 
+            <motion.div
               initial={{ y: -20 }}
               animate={{ y: 0 }}
               transition={{ delay: 0.2 }}
@@ -84,98 +90,89 @@ const LoginForm: React.FC = () => {
             </motion.div>
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <Alert variant="danger" className="border-0 rounded-3">{error}</Alert>
+              <motion.div animate={alertControls}>
+                <Alert variant="danger" className="border-0 rounded-3 small">
+                  <ul className="mb-0 ps-3">
+                    {error.map((msg, i) => (
+                      <li key={i}>{msg}</li>
+                    ))}
+                  </ul>
+                </Alert>
               </motion.div>
             )}
+
             {success && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                 <Alert variant="success" className="border-0 rounded-3">{success}</Alert>
               </motion.div>
             )}
 
             <Form onSubmit={handleSubmit}>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                 <FloatingLabel controlId="username" label="Email" className="mb-3">
+              <Stack gap={1}>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+                  <FloatingLabel controlId="username" label="Email" className="mb-3">
                     <Form.Control
                       type="email"
                       name="username"
                       value={form.username}
                       onChange={handleChange}
-                      placeholder=""
+                      placeholder=" "
                       required
                       className="form-control-sm border-2 rounded-3"
                       style={{ height: 'calc(3.5rem + 2px)', paddingTop: '1.625rem' }}
                     />
                     <Mail className="input-icon" size={18} />
-                </FloatingLabel>
-              </motion.div>
+                  </FloatingLabel>
+                </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                <FloatingLabel controlId="password" label="Password" className="mb-3">
-                  <Form.Control
-                    type="password"
-                    name="password"
-                    value={form.password}
-                    onChange={handleChange}
-                    placeholder=" "
-                    required
-                    className="form-control-sm border-2 rounded-3"
-                    style={{ height: 'calc(3.5rem + 2px)', paddingTop: '1.625rem' }}
-                  />
-                  <Lock className="input-icon" size={18} />
-                </FloatingLabel>
-              </motion.div>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
+                  <FloatingLabel controlId="password" label="Password" className="mb-3">
+                    <Form.Control
+                      type="password"
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      placeholder=" "
+                      required
+                      className="form-control-sm border-2 rounded-3"
+                      style={{ height: 'calc(3.5rem + 2px)', paddingTop: '1.625rem' }}
+                    />
+                    <Lock className="input-icon" size={18} />
+                  </FloatingLabel>
+                </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
-                <Button 
-                  type="submit" 
-                  className="w-100 rounded-3 py-3 fw-bold" 
-                  variant="primary" 
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <Spinner animation="border" size="sm" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </Spinner>
-                  ) : (
-                    'Sign In'
-                  )}
-                </Button>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="text-center mt-3"
-              >
-                <Link to="/" className="text-decoration-none">Forgot password?</Link>
-              </motion.div>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+                  <Button
+                    type="submit"
+                    className="w-100 rounded-3 py-3 fw-bold"
+                    variant="primary"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Spinner animation="border" size="sm" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </Spinner>
+                    ) : (
+                      'Sign In'
+                    )}
+                  </Button>
+                </motion.div>
+              </Stack>
             </Form>
 
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
+              transition={{ delay: 0.5 }}
+              className="text-center mt-3"
+            >
+              <Link to="/" className="text-decoration-none">Forgot password?</Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.55 }}
               className="mt-4 pt-3 text-center border-top"
             >
               <Stack direction="horizontal" gap={1} className="justify-content-center">

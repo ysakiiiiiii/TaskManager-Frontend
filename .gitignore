@@ -1,5 +1,5 @@
 # =====================================================
-# ✅ Logs
+# Logs
 # =====================================================
 logs/
 *.log
@@ -59,35 +59,6 @@ build/Release/
 *.orig
 *.swp
 
-# =====================================================
-# Package outputs
-# =====================================================
-*.tgz
-.yarn-integrity
-.yalc/
-yalc.lock
-
-# =====================================================
-# Frameworks & Tools
-# =====================================================
-# Next.js
-.next/
-# Nuxt
-.nuxt/
-# VuePress
-.vuepress/dist/
-# Grunt
-.grunt/
-# Bower
-bower_components/
-# Serverless
-.serverless/
-# FuseBox
-.fusebox/
-# DynamoDB Local
-.dynamodb/
-# Parcel
-.cache/
 
 # =====================================================
 # Frontend folders
@@ -99,31 +70,4 @@ lib/
 cjs/
 jspm_packages/
 
-# =====================================================
-# Testing
-# =====================================================
-# Jest / Vitest
-.vitest/
-coverage/
-test-results/
-# Playwright / Cypress
-playwright-report/
-cypress/screenshots/
-cypress/videos/
 
-# =====================================================
-# Docker 
-# =====================================================
-Dockerfile
-.dockerignore
-docker-compose.yml
-docker-compose.override.yml
-*.container.log
-
-# =====================================================
-# Databases 
-# =====================================================
-*.sqlite
-*.sqlite3
-*.db
-*.db3
