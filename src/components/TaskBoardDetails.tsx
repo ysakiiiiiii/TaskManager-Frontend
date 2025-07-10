@@ -9,9 +9,8 @@ import {
   Image,
   ProgressBar,
   ListGroup,
-  Stack,
 } from "react-bootstrap";
-import { getStatusColor } from "../pages/TaskTable";
+import { getStatusColor } from "../utils/userUtils";
 import type { Task, Priority, ChecklistItem } from "../data/types";
 
 interface TaskBoardDetailsProps {

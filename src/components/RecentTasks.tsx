@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import type { Task } from "../data/types";
-import { getStatusColor } from "../pages/TaskTable";
+import { getStatusColor } from "../utils/userUtils";
 
 interface RecentTasksProps {
   tasks: Task[];

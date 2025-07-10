@@ -12,17 +12,13 @@ import {
   Stack,
 } from "react-bootstrap";
 import { motion } from "framer-motion";
-import { Mail, Lock, EyeOff, Eye } from "react-feather";
+import { Mail, EyeOff, Eye } from "react-feather";
 import { Link } from "react-router-dom";
 import "../styles/LoginForm.css";
-
-interface LoginFormState {
-  username: string;
-  password: string;
-}
+import type { LoginDto, LoginResponse } from "../interfaces/auth";
 
 const LoginForm: React.FC = () => {
-  const [form, setForm] = useState<LoginFormState>({
+  const [form, setForm] = useState<LoginDto>({
     username: "",
     password: "",
   });
@@ -43,11 +39,11 @@ const LoginForm: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await api.post("/User/Login", form);
+      const response = await api.post<LoginResponse>("/User/Login", form);
 
       if (response.data.success) {
         setSuccess("Login successful! Redirecting...");
-        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("authToken", response.data.token || "");
         setTimeout(() => (window.location.href = "/dashboard"), 1500);
       } else {
         const errors = response.data.errors ?? [
