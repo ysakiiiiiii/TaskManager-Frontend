@@ -98,6 +98,7 @@ export interface TaskFilterParams {
   category?: string;
   priority?: string;
   status?: string;
+  type? : string;
   sortBy?: string;
   isAscending?: boolean;
   page?: number;

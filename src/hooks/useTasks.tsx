@@ -1,17 +1,30 @@
-// src/hooks/useTasks.ts
 import { useState, useEffect, useCallback } from 'react';
 import { TaskService } from '../services/taskServices';
-import type { TaskFilterParams, Task, PaginatedTaskResponse } from '../interfaces/task';
+import type { TaskFilterParams, Task } from '../interfaces/task';
+
+interface TaskState {
+  tasks: Task[];
+  loading: boolean;
+  error: string | null;
+  filters: TaskFilterParams;
+  pagination: {
+    page: number;
+    totalCount: number;
+    totalPages: number;
+  };
+}
 
 export const useTasks = (initialFilters: TaskFilterParams) => {
-  const [state, setState] = useState({
-    tasks: [] as Task[],
+  const [state, setState] = useState<TaskState>({
+    tasks: [],
     loading: false,
-    error: null as string | null,
-    filters: initialFilters,
+    error: null,
+    filters: {
+      ...initialFilters,
+      pageSize: initialFilters.pageSize || 5,
+    },
     pagination: {
-      page: initialFilters.page || 1,
-      pageSize: initialFilters.pageSize || 10,
+      page: 1,
       totalCount: 0,
       totalPages: 1,
     },
@@ -24,15 +37,13 @@ export const useTasks = (initialFilters: TaskFilterParams) => {
       const response = await TaskService.getAllTasks({
         ...state.filters,
         page: state.pagination.page,
-        pageSize: state.pagination.pageSize,
       });
 
       setState(prev => ({
         ...prev,
         tasks: response.items,
         pagination: {
-          page: response.page,
-          pageSize: response.pageSize,
+          ...prev.pagination,
           totalCount: response.totalCount,
           totalPages: response.totalPages,
         },
@@ -44,7 +55,7 @@ export const useTasks = (initialFilters: TaskFilterParams) => {
     } finally {
       setState(prev => ({ ...prev, loading: false }));
     }
-  }, [state.filters, state.pagination.page, state.pagination.pageSize]);
+  }, [state.filters, state.pagination.page]);
 
   useEffect(() => {
     loadTasks();
@@ -61,25 +72,21 @@ export const useTasks = (initialFilters: TaskFilterParams) => {
     }));
   };
 
-  const changePage = (newPage: number) => {
+  const changePage = (page: number) => {
     setState(prev => ({
       ...prev,
       pagination: {
         ...prev.pagination,
-        page: newPage,
+        page,
       },
     }));
   };
 
-  const changePageSize = (newPageSize: number) => {
+  const changePageSize = (pageSize: number) => {
     setState(prev => ({
       ...prev,
-      pagination: {
-        page: 1,
-        pageSize: newPageSize,
-        totalCount: prev.pagination.totalCount,
-        totalPages: Math.ceil(prev.pagination.totalCount / newPageSize),
-      },
+      filters: { ...prev.filters, pageSize },
+      pagination: { ...prev.pagination, page: 1 },
     }));
   };
 
@@ -88,7 +95,10 @@ export const useTasks = (initialFilters: TaskFilterParams) => {
     loading: state.loading,
     error: state.error,
     filters: state.filters,
-    pagination: state.pagination,
+    pagination: {
+      ...state.pagination,
+      pageSize: state.filters.pageSize!,
+    },
     updateFilters,
     changePage,
     changePageSize,

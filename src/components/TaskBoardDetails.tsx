@@ -11,6 +11,7 @@ import {
   ListGroup,
 } from "react-bootstrap";
 import { getStatusColor } from "../utils/userUtils";
+import type { Task, Priority, ChecklistItem } from "../data/types";
 
 interface TaskBoardDetailsProps {
   task: Task;

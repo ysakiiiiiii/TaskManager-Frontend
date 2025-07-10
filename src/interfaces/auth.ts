@@ -6,7 +6,17 @@ export interface RegisterFormState {
   confirmPassword: string;
   agree: boolean;
 }
+export interface LoginDto {
+  username: string;
+  password: string;
+}
 
+export interface LoginResponse {
+  success: boolean;
+  token?: string;
+  message?: string;
+  errors?: string[];
+}
 export interface AuthContextProps {
   user: any;
   role: string | null;

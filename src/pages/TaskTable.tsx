@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "../styles/TaskTable.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -14,6 +14,7 @@ const DEFAULT_FILTERS = {
   priority: "",
   status: "",
   search: "",
+  type: "",
 };
 
 const VIEW_CONFIG = {
@@ -30,7 +31,7 @@ const VIEW_CONFIG = {
 };
 
 export default function TaskTable() {
-  const { role, loading: authLoading } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
   const { filters: enumFilters, loading: filtersLoading } = useSearchFilters();
   
   const [viewMode, setViewMode] = useState<keyof typeof VIEW_CONFIG>("list");
@@ -44,7 +45,11 @@ export default function TaskTable() {
     updateFilters,
     changePage,
     changePageSize,
-  } = useTasks(DEFAULT_FILTERS);
+    refreshTasks,
+  } = useTasks(useMemo(() => DEFAULT_FILTERS, []));
+
+  console.log("Current filters:", filters);
+
 
   const filterOptions = useMemo(() => [
     { key: "category", label: "Category", values: enumFilters.categories },
@@ -62,11 +67,13 @@ export default function TaskTable() {
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateFilters({ search: e.target.value });
+      console.log(`Search changed: ${e.target.value}`);
+    updateFilters({ search: e.target.value, page: 1 });
   };
 
   const handleFilterChange = (key: keyof typeof DEFAULT_FILTERS, value: string) => {
-    updateFilters({ [key]: value });
+    console.log(`Filter changed: ${key} = ${value}`);
+    updateFilters({ [key]: value, page: 1 });
   };
 
   const renderPagination = () => {
@@ -160,7 +167,7 @@ export default function TaskTable() {
             onChange={(e) => handleFilterChange(key as keyof typeof DEFAULT_FILTERS, e.target.value)}
             disabled={filtersLoading}
           >
-            <option value="">Select {label}</option>
+            <option value="">All {label}</option>
             {filtersLoading ? (
               <option disabled>Loading...</option>
             ) : (
@@ -171,6 +178,18 @@ export default function TaskTable() {
           </Form.Select>
         </div>
       ))}
+
+      <div className="col-md">
+        <Form.Select
+          size="sm"
+          value={filters.type || ""}
+          onChange={(e) => handleFilterChange("type", e.target.value)}
+        >
+          <option value="">All Tasks</option>
+          <option value="created">Created by me</option>
+          <option value="assigned">Assigned to me</option>
+        </Form.Select>
+      </div>
     </div>
   );
 
@@ -186,17 +205,21 @@ export default function TaskTable() {
       </div>
 
       <div className={`col-12 ${role === "admin" ? "col-md-4" : "col-md-6"}`}>
-        <Button variant="primary" className="w-100 text-white" style={{ backgroundColor: "#6a6dfb" }}>
+        <Button 
+          variant="primary" 
+          className="w-100 text-white"
+          style={{ backgroundColor: "#6a6dfb" }}
+        >
           + Add New Task
         </Button>
       </div>
 
       {role === "admin" && !authLoading && (
-        <div className="col-12 col-md-4 pe-5">
+        <div className="col-12 col-md-4">
           <Button 
             variant="primary" 
-            className="w-100 text-white text-nowrap px-3"
-            style={{ minWidth: "200px", backgroundColor: "#6a6dfb" }}
+            className="w-100 text-white text-nowrap"
+            style={{ backgroundColor: "#6a6dfb" }}
           >
             + Add New Category
           </Button>
@@ -208,7 +231,9 @@ export default function TaskTable() {
   const renderContent = () => {
     if (tasksLoading) return <div className="text-center py-5">Loading tasks...</div>;
     if (error) return <div className="alert alert-danger">{error}</div>;
+    if (tasks.length === 0) return <div className="text-center py-5">No tasks found matching your criteria</div>;
     
+    console.log("📋 Rendering with tasks:", tasks);
     return viewMode === "list" ? (
       <TaskListView tasks={tasks}/>
     ) : (
@@ -234,6 +259,7 @@ export default function TaskTable() {
                 className="pe-4"
                 value={pagination.pageSize as string | number | readonly string[] | undefined}
                 onChange={handlePageSizeChange}
+                style={{ width: 'auto' }}
               >
                 {VIEW_CONFIG[viewMode].pageSizes.map((n) => (
                   <option key={n} value={n}>

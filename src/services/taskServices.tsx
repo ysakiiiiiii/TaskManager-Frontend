@@ -1,4 +1,3 @@
-
 import api from '../api/api';
 import type { ApiResponse, PaginatedTaskResponse, Task, TaskFilterParams } from '../interfaces/task';
 import { transformTask } from '../interfaces/task';
@@ -7,14 +6,15 @@ export const TaskService = {
   async getAllTasks(params: TaskFilterParams): Promise<PaginatedTaskResponse> {
     const response = await api.get<ApiResponse<PaginatedTaskResponse>>('/TaskItem', {
       params: {
-        search: params.search,
-        category: params.category,
-        priority: params.priority,
-        status: params.status,
-        sortBy: params.sortBy,
+        Search: params.search,
+        Category: params.category,
+        Priority: params.priority,
+        Status: params.status,
+        SortBy: params.sortBy,
         isAscending: params.isAscending,
-        pageNumber: params.page,
-        pageSize: params.pageSize,
+        Page: params.page,
+        PageSize: params.pageSize,
+        Type: params.type,
       },
     });
     return {
