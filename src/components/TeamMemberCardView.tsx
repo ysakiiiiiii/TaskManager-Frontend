@@ -1,119 +1,121 @@
 import React from "react";
-import { Card, Image, Badge, Button } from "react-bootstrap";
-import type { User } from "../data/taskInterfaces";
-import { getStatusColor, statusLabels } from "../utils/userUtils";
-
-const getAvatarUrl = (name: string) => {
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
-};
+import { Card, Badge } from "react-bootstrap";
+import { getAvatarUrl, getStatusColor, statusLabels } from "../utils/userUtils";
+import type { User } from "../interfaces/user";
 
 interface TeamMemberCardViewProps {
   users: User[];
-  onUserSelect: (user: User) => void;
   toggleStatus: (id: string) => void;
+  onEdit: (user: User) => void;
+  onDelete: (id: string) => void;
 }
 
-const TeamMemberCardView: React.FC<TeamMemberCardViewProps> = ({ 
-  users, 
-  onUserSelect,
-  toggleStatus
+const TeamMemberCardView: React.FC<TeamMemberCardViewProps> = ({
+  users,
+  toggleStatus,
+  onEdit,
+  onDelete
 }) => {
   return (
-    <div className="row">
+    <div className="row g-4">
       {users.map((user) => (
-        <div key={user.id} className="col-md-6 col-lg-4 mb-4">
-          <Card
-            className="h-100 shadow-sm border-0 p-3"
-            style={{
-              backgroundColor: "#f9f9f9",
-              borderRadius: "1rem",
-              transition: "transform 0.2s ease",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
-          >
+        <div className="col-12 col-sm-6 col-lg-4" key={user.id}>
+          <Card className="h-100 border-0 shadow-lg hover-shadow transition-all">
             <Card.Body className="d-flex flex-column">
-              <div className="d-flex align-items-center justify-content-between mb-3">
-                <div 
-                  className="d-flex align-items-center" 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => onUserSelect(user)}
-                >
-                  <Image
+              <div className="d-flex align-items-center gap-3 mb-4">
+                <div className="position-relative">
+                  <img
                     src={getAvatarUrl(`${user.firstName} ${user.lastName}`)}
                     alt="avatar"
-                    roundedCircle
-                    width={48}
-                    height={48}
-                    className="me-3 border"
+                    className="rounded-circle border border-3 border-white shadow-sm"
+                    width={56}
+                    height={56}
                   />
-                  <div>
-                    <h6 className="mb-0">
-                      {user.firstName} {user.lastName}
-                    </h6>
-                    <div className="text-muted small">{user.username}</div>
-                  </div>
+                  <span 
+                    className={`position-absolute bottom-0 end-0 p-1 rounded-circle border border-2 border-white ${user.isActive ? "bg-success" : "bg-secondary"}`}
+                    style={{ width: "14px", height: "14px" }}
+                  />
                 </div>
-                <Button 
-                  size="sm"
-                  variant={user.isActive ? "outline-danger" : "outline-success"}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleStatus(user.id);
-                  }}
+                <div>
+                  <h5 className="fw-bold mb-0">{user.firstName} {user.lastName}</h5>
+                  <small className="text-muted">@{user.email.split('@')[0]}</small>
+                  <a 
+                    href={`mailto:${user.email}`} 
+                    className="d-block text-decoration-none text-primary small text-truncate"
+                    style={{ maxWidth: "200px" }}
+                  >
+                    {user.email}
+                  </a>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <span className="text-muted small">Status:</span>
+                  <Badge 
+                    pill 
+                    bg={user.isActive ? "success-light" : "secondary-light"} 
+                    text={user.isActive ? "success" : "secondary"}
+                    className="px-2 py-1"
+                  >
+                    {user.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+                
+                <div className="d-flex align-items-center gap-2">
+                  <span className="text-muted small">Tasks:</span>
+                  {user.taskStatusCounts?.length ? (
+                    <div className="d-flex gap-2 flex-wrap">
+                      {user.taskStatusCounts.map(({ statusId, count }) => (
+                        <span
+                          key={statusId}
+                          className="badge rounded-pill px-2 py-1"
+                          style={{ 
+                            backgroundColor: getStatusColor(statusLabels[statusId]),
+                            color: "white",
+                            fontSize: "0.75rem"
+                          }}
+                        >
+                          {statusLabels[statusId]}: {count}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-muted small">No tasks assigned</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-auto d-flex justify-content-end gap-2">
+                <button
+                  className={`btn btn-icon ${user.isActive ? "btn-danger-soft" : "btn-success-soft"}`}
+                  onClick={() => toggleStatus(user.id)}
+                  aria-label={user.isActive ? "Deactivate" : "Activate"}
+                  data-bs-toggle="tooltip"
+                  title={user.isActive ? "Deactivate" : "Activate"}
                 >
-                  {user.isActive ? 'Deactivate' : 'Activate'}
-                </Button>
-              </div>
+                  <i className={`bi ${user.isActive ? "bi-toggle-on" : "bi-toggle-off"}`} />
+                </button>
 
-              <div className="mb-2" onClick={() => onUserSelect(user)} style={{ cursor: 'pointer' }}>
-                <a href={`mailto:${user.email}`} className="text-muted small text-decoration-none">
-                  <i className="bi bi-envelope me-2"></i>
-                  {user.email}
-                </a>
-              </div>
+                <button
+                  className="btn btn-icon btn-primary-soft"
+                  onClick={() => onEdit(user)}
+                  aria-label="Edit"
+                  data-bs-toggle="tooltip"
+                  title="Edit"
+                >
+                  <i className="bi bi-pencil" />
+                </button>
 
-              <div className="mb-3" onClick={() => onUserSelect(user)} style={{ cursor: 'pointer' }}>
-                <Badge bg={user.isActive ? "primary" : "secondary"}>
-                  {user.isActive ? "Active" : "Inactive"}
-                </Badge>
-              </div>
-
-              <div className="mt-auto" onClick={() => onUserSelect(user)} style={{ cursor: 'pointer' }}>
-                <h6 className="text-muted text-uppercase small mb-2">Task Status</h6>
-                <div className="d-flex flex-wrap gap-2">
-                  {[1, 2, 3, 4].map((statusId) => {
-                    const status = statusLabels[statusId];
-                    const count = user.tasks.filter((task) => task.statusId === statusId).length;
-                    const color = getStatusColor(status);
-                    const bgColor = status === "Done" ? "#e6f5ef" : "#ffffff";
-                    const isDone = status === "Done";
-
-                    return (
-                      <div
-                        key={statusId}
-                        className="flex-grow-1 p-2 rounded border"
-                        style={{
-                          borderLeft: `4px solid ${color}`,
-                          backgroundColor: bgColor,
-                          minWidth: "80px",
-                        }}
-                      >
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span className="small text-muted">{status}</span>
-                          <Badge
-                            pill
-                            bg={isDone ? "success" : "light"}
-                            text={isDone ? "light" : "dark"}
-                            className="px-2 border"
-                          >
-                            {count}
-                          </Badge>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <button
+                  className="btn btn-icon btn-danger-soft"
+                  onClick={() => onDelete(user.id)}
+                  aria-label="Delete"
+                  data-bs-toggle="tooltip"
+                  title="Delete"
+                >
+                  <i className="bi bi-trash" />
+                </button>
               </div>
             </Card.Body>
           </Card>

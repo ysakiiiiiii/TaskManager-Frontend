@@ -151,7 +151,7 @@ const Dashboard = () => {
                     <div className="col-6 col-sm-4 col-lg-2">
                       <div className="p-3 bg-white rounded shadow-sm border-start border-4 border-danger">
                         <h4 className="mb-0 fw-bold">{overdueCount}</h4>
-                        <small className="text-muted">Overdue</small>
+                        <small className="text-muted">On Hold</small>
                       </div>
                     </div>
                     <div className="col-6 col-sm-4 col-lg-2">

@@ -160,7 +160,7 @@ export const transformTask = (task: any): Task => {
 
     priority: {
       id: task.priorityId,
-      name: task.priorityName ?? "Normal",
+      name: task.priorityName ?? "Low",
     },
 
     status: {

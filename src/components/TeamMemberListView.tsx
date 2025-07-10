@@ -1,24 +1,20 @@
 import React from "react";
 import { Table, Badge } from "react-bootstrap";
-import type { User } from "../data/taskInterfaces";
 import { getAvatarUrl, getStatusColor, statusLabels } from "../utils/userUtils";
+import type { User } from "../interfaces/user";
 
 interface TeamMemberListViewProps {
   users: User[];
-  onUserSelect: (user: User | null) => void;
   toggleStatus: (id: string) => void;
   onEdit: (user: User) => void;
   onDelete: (id: string) => void;
-  selectedUserId?: string;
 }
 
-const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({ 
-  users, 
-  onUserSelect,
+const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
+  users,
   toggleStatus,
   onEdit,
   onDelete,
-  selectedUserId
 }) => {
   return (
     <table className="table table-bordered align-middle table-fixed w-100">
@@ -33,14 +29,10 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
       </thead>
       <tbody>
         {users.map(user => (
-          <tr
-            key={user.id}
-            onClick={() => onUserSelect(user)}
-            className={`user-row ${selectedUserId === user.id ? 'selected-row' : ''}`}
-          >
+          <tr key={user.id}>
             <td>
               <div className="d-flex align-items-center gap-3">
-                <img 
+                <img
                   src={getAvatarUrl(`${user.firstName} ${user.lastName}`)}
                   alt="avatar"
                   className="rounded-circle"
@@ -49,7 +41,7 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
                 />
                 <div>
                   <div className="fw-semibold">{user.firstName} {user.lastName}</div>
-                  <div className="text-muted small">@{user.username}</div>
+                  <div className="text-muted small">@{user.email}</div>
                 </div>
               </div>
             </td>
@@ -64,26 +56,21 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
               </Badge>
             </td>
             <td className="d-none d-lg-table-cell">
-              <div className="d-flex gap-2 flex-wrap">
-                {[1, 2, 3, 4].map(statusId => {
-                  const count = user.tasks.filter(task => task.statusId === statusId).length;
-                  if (count === 0) return null;
-                  const color = getStatusColor(statusLabels[statusId]);
-                  return (
-                    <span 
+              {user.taskStatusCounts?.length
+                ? user.taskStatusCounts.map(({ statusId, count }) => (
+                    <span
                       key={statusId}
                       className="badge rounded-pill"
-                      style={{ backgroundColor: color }}
+                      style={{ backgroundColor: getStatusColor(statusLabels[statusId]) }}
                     >
                       {statusLabels[statusId]}: {count}
                     </span>
-                  );
-                })}
-              </div>
+                  ))
+                : <span className="text-muted small">No tasks</span>}
+
             </td>
             <td className="text-end">
               <div className="d-flex justify-content-center gap-2">
-                {/* Toggle Status */}
                 <button
                   className={`btn p-3 rounded-circle ${user.isActive ? 'text-danger' : 'text-success'}`}
                   style={{
@@ -93,35 +80,24 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleStatus(user.id);
-                  }}
+                  onClick={() => toggleStatus(user.id)}
                   aria-label={user.isActive ? 'Deactivate' : 'Activate'}
                 >
                   <i className={`bi ${user.isActive ? 'bi-toggle-on' : 'bi-toggle-off'}`} style={{ fontSize: '1.5rem' }} />
                 </button>
 
-                {/* Edit */}
                 <button
                   className="btn btn-sm p-2 rounded-circle text-primary"
                   aria-label="Edit"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit(user);
-                  }}
+                  onClick={() => onEdit(user)}
                 >
                   <i className="bi bi-pencil" />
                 </button>
 
-                {/* Delete */}
                 <button
                   className="btn btn-sm p-2 rounded-circle text-muted hover-danger"
                   aria-label="Delete"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(user.id);
-                  }}
+                  onClick={() => onDelete(user.id)}
                 >
                   <i className="bi bi-trash" />
                 </button>
