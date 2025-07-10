@@ -13,7 +13,7 @@ export const TaskService = {
         SortBy: params.sortBy,
         isAscending: params.isAscending,
         Page: params.page,
-        PageSize: params.pageSize,
+        PageSize: params.pageSize === 0 ? 10000 : params.pageSize,
         Type: params.type,
       },
     });

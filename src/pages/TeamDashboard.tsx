@@ -1,60 +1,28 @@
 import React, { useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, Spinner } from "react-bootstrap";
 import TeamMemberCardView from "../components/TeamMemberCardView";
 import TeamMemberListView from "../components/TeamMemberListView";
-import { teamMembers, type User } from "../data/taskInterfaces";
+import useUsers from "../hooks/useUsers";
+import type { User } from "../interfaces/user";
 import "../styles/TeamDashboard.css";
 
 const TeamDashboard: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(teamMembers);
-  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
   const [tasksPerPage, setTasksPerPage] = useState(viewMode === "list" ? 5 : 6);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
 
-  const toggleStatus = (id: string) => {
-    setUsers(
-      users.map((user) =>
-        user.id === id ? { ...user, isActive: !user.isActive } : user
-      )
-    );
-  };
+  const { data, loading } = useUsers(statusFilter, page, tasksPerPage);
+  const users = data?.items ?? [];
+  const totalCount = data?.totalCount ?? 0;
+  const totalPages = tasksPerPage === 0 ? 1 : Math.ceil(totalCount / tasksPerPage);
 
-  const handleEdit = (user: User) => {
-    console.log("Editing user:", user);
-    setSelectedUser(user);
-  };
-
-  const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers(users.filter((user) => user.id !== id));
-    }
-  };
-
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      `${user.firstName} ${user.lastName}`
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus =
-      !statusFilter ||
-      (statusFilter === "Active" && user.isActive) ||
-      (statusFilter === "Inactive" && !user.isActive);
-
-    return matchesSearch && matchesStatus;
-  });
-
-  const paginatedUsers =
-    tasksPerPage === 0
-      ? filteredUsers
-      : filteredUsers.slice((page - 1) * tasksPerPage, page * tasksPerPage);
-
-  const totalPages =
-    tasksPerPage === 0 ? 1 : Math.ceil(filteredUsers.length / tasksPerPage);
+  const paginatedUsers = users.filter((user) =>
+    `${user.firstName} ${user.lastName} ${user.email}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
 
   const handleFilterChange = (key: "status", value: string) => {
     if (key === "status") setStatusFilter(value);
@@ -67,12 +35,21 @@ const TeamDashboard: React.FC = () => {
     setPage(1);
   };
 
-  const maxPageButtons = 5;
+  const toggleStatus = (id: string) => {
+    console.log("Toggle not persisted. This should call an API.");
+  };
+
+  const handleEdit = (user: User) => {
+    console.log("Edit user:", user);
+  };
+
+  const handleDelete = (id: string) => {
+    console.log("Delete not persisted. This should call an API.");
+  };
 
   const getPageList = () => {
-    if (totalPages <= maxPageButtons) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
+    const maxPageButtons = 5;
+    if (totalPages <= maxPageButtons) return Array.from({ length: totalPages }, (_, i) => i + 1);
 
     const half = Math.floor(maxPageButtons / 2);
     let start = Math.max(2, page - half + 1);
@@ -94,10 +71,9 @@ const TeamDashboard: React.FC = () => {
     <div className="card border-0 shadow-sm">
       <div className="card-body">
         <div className="task-table-wrapper px-3 py-4">
+          {/* Header */}
           <div className="d-flex justify-content-between align-items-center mb-3">
-            <h4 className="font-poppins mb-0 fs-5 fs-md-4 fs-lg-3">
-              Team Members
-            </h4>
+            <h4 className="font-poppins mb-0 fs-5 fs-md-4 fs-lg-3">Team Members</h4>
             <div>
               <Button
                 variant={viewMode === "list" ? "primary" : "outline-secondary"}
@@ -125,8 +101,8 @@ const TeamDashboard: React.FC = () => {
             </div>
           </div>
 
+          {/* Filters */}
           <div className="mb-3">
-            {/* Top Row: Filters */}
             <div className="row g-2 mb-2">
               <div className="col-md">
                 <Form.Select
@@ -138,145 +114,103 @@ const TeamDashboard: React.FC = () => {
                   <option value="Inactive">Inactive</option>
                 </Form.Select>
               </div>
-              <div className="col-md"></div> {/* Empty column for alignment */}
+              <div className="col-md"></div>
             </div>
 
-            <div>
-              <hr className="border border-dark my-5" />
-            </div>
+            <hr className="border border-dark my-5" />
 
-            {/* Bottom Row: Pagination + Search + Add */}
-            <div
-              className="d-flex flex-wrap justify-content-between align-items-center gap-2 
-                          justify-content-center justify-content-sm-between text-center"
-            >
-              <div>
-                <Form.Select
-                  value={tasksPerPage}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value, 10);
-                    setTasksPerPage(value);
-                    setPage(1);
-                  }}
-                >
-                  {viewMode === "list" ? (
-                    <>
-                      <option value={5}>5 per page</option>
-                      <option value={10}>10 per page</option>
-                      <option value={20}>20 per page</option>
-                      <option value={50}>50 per page</option>
-                      <option value={0}>All</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value={6}>6 per page</option>
-                      <option value={12}>12 per page</option>
-                      <option value={18}>18 per page</option>
-                      <option value={0}>All</option>
-                    </>
-                  )}
-                </Form.Select>
-              </div>
+            {/* Controls */}
+            <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 justify-content-center justify-content-sm-between text-center">
+              <Form.Select
+                value={tasksPerPage}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  setTasksPerPage(value);
+                  setPage(1);
+                }}
+              >
+                {viewMode === "list" ? (
+                  <>
+                    <option value={5}>5 per page</option>
+                    <option value={10}>10 per page</option>
+                    <option value={20}>20 per page</option>
+                    <option value={50}>50 per page</option>
+                    <option value={0}>All</option>
+                  </>
+                ) : (
+                  <>
+                    <option value={6}>6 per page</option>
+                    <option value={12}>12 per page</option>
+                    <option value={18}>18 per page</option>
+                    <option value={0}>All</option>
+                  </>
+                )}
+              </Form.Select>
 
-              <div className="d-flex align-items-center gap-2">
-                <Form.Control
-                  type="text"
-                  placeholder="Search Members"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
+              <Form.Control
+                type="text"
+                placeholder="Search Members"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
           </div>
 
-          {viewMode === "list" ? (
+          {/* View Section */}
+          {loading ? (
+            <div className="text-center py-5">
+              <Spinner animation="border" variant="primary" />
+            </div>
+          ) : paginatedUsers.length === 0 ? (
+            <div className="text-center py-5 text-muted">No members found.</div>
+          ) : viewMode === "list" ? (
             <TeamMemberListView
               users={paginatedUsers}
-              onUserSelect={(user) => {
-                setSelectedUser(user);
-                setShowDetails(true);
-              }}
               toggleStatus={toggleStatus}
               onEdit={handleEdit}
               onDelete={handleDelete}
-              selectedUserId={selectedUser?.id}
             />
           ) : (
             <TeamMemberCardView
               users={paginatedUsers}
-              onUserSelect={(user) => {
-                setSelectedUser(user);
-                setShowDetails(true);
-              }}
               toggleStatus={toggleStatus}
-              // onEdit={handleEdit}
-              // onDelete={handleDelete}
-              // selectedUserId={selectedUser?.id}
             />
           )}
 
-          {totalPages > 1 && (
+          {/* Pagination */}
+          {tasksPerPage !== 0 && totalPages > 1 && (
             <nav className="mt-3">
               <ul className="pagination justify-content-center">
                 <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                  <button
-                    className="page-link"
-                    onClick={() => setPage(1)}
-                    disabled={page === 1}
-                  >
+                  <button className="page-link" onClick={() => setPage(1)} disabled={page === 1}>
                     &laquo;
                   </button>
                 </li>
                 <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                  <button
-                    className="page-link"
-                    onClick={() => setPage(page - 1)}
-                    disabled={page === 1}
-                  >
+                  <button className="page-link" onClick={() => setPage(page - 1)} disabled={page === 1}>
                     &lsaquo;
                   </button>
                 </li>
-
                 {getPageList().map((p, i) =>
                   typeof p === "string" ? (
                     <li key={i} className="page-item disabled">
                       <span className="page-link">…</span>
                     </li>
                   ) : (
-                    <li
-                      key={i}
-                      className={`page-item ${page === p ? "active" : ""}`}
-                    >
+                    <li key={i} className={`page-item ${page === p ? "active" : ""}`}>
                       <button className="page-link" onClick={() => setPage(p)}>
                         {p}
                       </button>
                     </li>
                   )
                 )}
-
-                <li
-                  className={`page-item ${
-                    page === totalPages ? "disabled" : ""
-                  }`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => setPage(page + 1)}
-                    disabled={page === totalPages}
-                  >
+                <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
+                  <button className="page-link" onClick={() => setPage(page + 1)} disabled={page === totalPages}>
                     &rsaquo;
                   </button>
                 </li>
-                <li
-                  className={`page-item ${
-                    page === totalPages ? "disabled" : ""
-                  }`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => setPage(totalPages)}
-                    disabled={page === totalPages}
-                  >
+                <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
+                  <button className="page-link" onClick={() => setPage(totalPages)} disabled={page === totalPages}>
                     &raquo;
                   </button>
                 </li>

@@ -4,6 +4,7 @@ import { BarChart, Bar, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContaine
 import 'bootstrap/dist/css/bootstrap.min.css';
 import RecentTasks from '../components/RecentTasks';
 import type { Task, Status, Priority, Category } from '../data/types';
+import TaskTable from './TaskTable';
 
 const COLORS = {
   Pending: '#7E57C2',
@@ -75,7 +76,6 @@ const Dashboard = () => {
 
   });
 
-  // Convert status counts to chart data (grouping Pending statuses)
   const statusData = [
     { name: 'Pending', value: statusCounts['To Do'] },
     { name: 'On Hold', value: statusCounts['On Hold'] },
@@ -151,7 +151,7 @@ const Dashboard = () => {
                     <div className="col-6 col-sm-4 col-lg-2">
                       <div className="p-3 bg-white rounded shadow-sm border-start border-4 border-danger">
                         <h4 className="mb-0 fw-bold">{overdueCount}</h4>
-                        <small className="text-muted">Overdue</small>
+                        <small className="text-muted">On Hold</small>
                       </div>
                     </div>
                     <div className="col-6 col-sm-4 col-lg-2">
@@ -296,7 +296,7 @@ const Dashboard = () => {
         <div className="col-md-12">
           <div className="card border-0 shadow-sm">
             <div className="card-body">
-              <RecentTasks tasks={allTasks} onTaskSelect={() => {}} />
+              <TaskTable/>
             </div>
           </div>
         </div>

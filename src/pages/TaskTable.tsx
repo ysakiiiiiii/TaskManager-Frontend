@@ -48,8 +48,6 @@ export default function TaskTable() {
     refreshTasks,
   } = useTasks(useMemo(() => DEFAULT_FILTERS, []));
 
-  console.log("Current filters:", filters);
-
 
   const filterOptions = useMemo(() => [
     { key: "category", label: "Category", values: enumFilters.categories },
@@ -67,12 +65,10 @@ export default function TaskTable() {
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      console.log(`Search changed: ${e.target.value}`);
     updateFilters({ search: e.target.value, page: 1 });
   };
 
   const handleFilterChange = (key: keyof typeof DEFAULT_FILTERS, value: string) => {
-    console.log(`Filter changed: ${key} = ${value}`);
     updateFilters({ [key]: value, page: 1 });
   };
 
@@ -219,7 +215,7 @@ export default function TaskTable() {
           <Button 
             variant="primary" 
             className="w-100 text-white text-nowrap"
-            style={{ backgroundColor: "#6a6dfb" }}
+            style={{ backgroundColor: "#6a6dfb", minWidth:"200px"}}
           >
             + Add New Category
           </Button>
@@ -233,7 +229,6 @@ export default function TaskTable() {
     if (error) return <div className="alert alert-danger">{error}</div>;
     if (tasks.length === 0) return <div className="text-center py-5">No tasks found matching your criteria</div>;
     
-    console.log("📋 Rendering with tasks:", tasks);
     return viewMode === "list" ? (
       <TaskListView tasks={tasks}/>
     ) : (
