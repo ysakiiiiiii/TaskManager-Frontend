@@ -5,7 +5,7 @@ import type { AuthContextProps, AuthUser } from '../interfaces/auth';
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-   const [user, setUser] = useState<AuthUser | null>(null);
+  const[user, setUser] = useState<AuthUser | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const isAuthenticated = !!user;

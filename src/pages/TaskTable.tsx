@@ -1,98 +1,219 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import "../styles/TaskTable.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-
-import type { Task, Status } from "../data/types";
-import { allTasks } from "../data/allTasks";
+import useSearchFilters from "../hooks/useSearchFilter";
 import TaskListView from "../components/TaskListView";
 import TaskCardView from "../components/TaskCardView";
-import TaskBoardDetails from "../components/TaskBoardDetails";
-import { Button } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
+import { useAuth } from "../context/AuthContext";
+import { useTasks } from "../hooks/useTasks";
 
-export const getStatusColor = (status: Status): string => {
-  switch (status) {
-    case "To Do":
-      return "#fcb329";
-    case "In Progress":
-      return "#dc3545";
-    case "Done":
-      return "#20b478";
-    case "On Hold":
-      return "#6610f2";
-    default:
-      return "#4caf50";
-  }
+const DEFAULT_FILTERS = {
+  category: "",
+  priority: "",
+  status: "",
+  search: "",
+};
+
+const VIEW_CONFIG = {
+  list: {
+    pageSizes: [5, 10, 20, 50, 0],
+    defaultPageSize: 5,
+    icon: "bi-list",
+  },
+  card: {
+    pageSizes: [6, 12, 18, 0],
+    defaultPageSize: 6,
+    icon: "bi-grid-3x3-gap",
+  },
 };
 
 export default function TaskTable() {
-  const [filters, setFilters] = useState({
-    category: "",
-    priority: "",
-    status: "",
-  });
-  const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"list" | "card">("list");
-  const [page, setPage] = useState(1);
-  const [tasksPerPage, setTasksPerPage] = useState(viewMode === "list" ? 5 : 6);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
-  const currentUser = {
-    id: "u1",
-    name: "You",
-    avatar: "",
-    email: "you@example.com",
+  const { role, loading: authLoading } = useAuth();
+  const { filters: enumFilters, loading: filtersLoading } = useSearchFilters();
+  
+  const [viewMode, setViewMode] = useState<keyof typeof VIEW_CONFIG>("list");
+  
+  const {
+    tasks,
+    loading: tasksLoading,
+    error,
+    pagination,
+    filters,
+    updateFilters,
+    changePage,
+    changePageSize,
+  } = useTasks(DEFAULT_FILTERS);
+
+  const filterOptions = useMemo(() => [
+    { key: "category", label: "Category", values: enumFilters.categories },
+    { key: "priority", label: "Priority", values: enumFilters.priorities },
+    { key: "status", label: "Status", values: enumFilters.statuses },
+  ], [enumFilters]);
+
+  const handleViewChange = (newView: keyof typeof VIEW_CONFIG) => {
+    setViewMode(newView);
+    changePageSize(VIEW_CONFIG[newView].defaultPageSize);
   };
 
-  const filteredTasks = allTasks.filter(
-    (task) =>
-      (!filters.category || task.category === filters.category) &&
-      (!filters.priority || task.priority === filters.priority) &&
-      (!filters.status || task.status === filters.status) &&
-      (task.title.toLowerCase().includes(search.toLowerCase()) ||
-        task.assignedTo.name.toLowerCase().includes(search.toLowerCase()))
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    changePageSize(Number(e.target.value));
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateFilters({ search: e.target.value });
+  };
+
+  const handleFilterChange = (key: keyof typeof DEFAULT_FILTERS, value: string) => {
+    updateFilters({ [key]: value });
+  };
+
+  const renderPagination = () => {
+    if (pagination.totalPages <= 1) return null;
+
+    const maxPageButtons = 5;
+    const pages: (number | string)[] = [];
+    
+    if (pagination.totalPages <= maxPageButtons) {
+      for (let i = 1; i <= pagination.totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      
+      const start = Math.max(2, pagination.page - 2);
+      const end = Math.min(pagination.totalPages - 1, pagination.page + 2);
+      
+      if (start > 2) pages.push("…");
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (end < pagination.totalPages - 1) pages.push("…");
+      if (pagination.totalPages > 1) pages.push(pagination.totalPages);
+    }
+
+    return (
+      <nav className="mt-3">
+        <ul className="pagination justify-content-center">
+          <li className={`page-item ${pagination.page === 1 ? "disabled" : ""}`}>
+            <button className="page-link" onClick={() => changePage(1)}>&laquo;</button>
+          </li>
+          <li className={`page-item ${pagination.page === 1 ? "disabled" : ""}`}>
+            <button className="page-link" onClick={() => changePage(pagination.page - 1)}>
+              &lsaquo;
+            </button>
+          </li>
+          
+          {pages.map((p, i) => (
+            typeof p === "string" ? (
+              <li key={i} className="page-item disabled">
+                <span className="page-link">…</span>
+              </li>
+            ) : (
+              <li key={i} className={`page-item ${pagination.page === p ? "active" : ""}`}>
+                <button className="page-link" onClick={() => changePage(p)}>
+                  {p}
+                </button>
+              </li>
+            )
+          ))}
+          
+          <li className={`page-item ${pagination.page === pagination.totalPages ? "disabled" : ""}`}>
+            <button className="page-link" onClick={() => changePage(pagination.page + 1)}>
+              &rsaquo;
+            </button>
+          </li>
+          <li className={`page-item ${pagination.page === pagination.totalPages ? "disabled" : ""}`}>
+            <button className="page-link" onClick={() => changePage(pagination.totalPages)}>
+              &raquo;
+            </button>
+          </li>
+        </ul>
+      </nav>
+    );
+  };
+
+  const renderViewToggle = () => (
+    <div>
+      {Object.entries(VIEW_CONFIG).map(([view, config]) => (
+        <Button
+          key={view}
+          variant={viewMode === view ? "primary" : "outline-secondary"}
+          className="me-2"
+          size="sm"
+          style={{ 
+            backgroundColor: viewMode === view ? "#6a6dfb" : undefined, 
+            borderColor: "#6a6dfb" 
+          }}
+          onClick={() => handleViewChange(view as keyof typeof VIEW_CONFIG)}
+        >
+          <i className={`bi ${config.icon}`}></i> {view.charAt(0).toUpperCase() + view.slice(1)}
+        </Button>
+      ))}
+    </div>
   );
 
-  const paginatedTasks =
-    tasksPerPage === 0
-      ? filteredTasks
-      : filteredTasks.slice((page - 1) * tasksPerPage, page * tasksPerPage);
+  const renderFilters = () => (
+    <div className="row g-2 mb-2">
+      {filterOptions.map(({ key, label, values }) => (
+        <div className="col-md" key={key}>
+          <Form.Select
+            size="sm"
+            value={filters[key as keyof typeof filters] as string | number | readonly string[] | undefined}
+            onChange={(e) => handleFilterChange(key as keyof typeof DEFAULT_FILTERS, e.target.value)}
+            disabled={filtersLoading}
+          >
+            <option value="">Select {label}</option>
+            {filtersLoading ? (
+              <option disabled>Loading...</option>
+            ) : (
+              values.map((val) => (
+                <option key={val} value={val}>{val}</option>
+              ))
+            )}
+          </Form.Select>
+        </div>
+      ))}
+    </div>
+  );
 
-  const totalPages =
-    tasksPerPage === 0 ? 1 : Math.ceil(filteredTasks.length / tasksPerPage);
+  const renderActionButtons = () => (
+    <div className="row g-2">
+      <div className={`col-12 ${role === "admin" ? "col-md-4" : "col-md-6"}`}>
+        <Form.Control
+          type="text"
+          placeholder="Search tasks"
+          value={filters.search || ""}
+          onChange={handleSearchChange}
+        />
+      </div>
 
-  const handleFilterChange = (key: keyof typeof filters, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-    setPage(1);
-  };
+      <div className={`col-12 ${role === "admin" ? "col-md-4" : "col-md-6"}`}>
+        <Button variant="primary" className="w-100 text-white" style={{ backgroundColor: "#6a6dfb" }}>
+          + Add New Task
+        </Button>
+      </div>
 
-  const handleViewChange = (newView: "list" | "card") => {
-    setViewMode(newView);
-    setTasksPerPage(newView === "list" ? 5 : 6);
-    setPage(1);
-  };
+      {role === "admin" && !authLoading && (
+        <div className="col-12 col-md-4 pe-5">
+          <Button 
+            variant="primary" 
+            className="w-100 text-white text-nowrap px-3"
+            style={{ minWidth: "200px", backgroundColor: "#6a6dfb" }}
+          >
+            + Add New Category
+          </Button>
+        </div>
+      )}
+    </div>
+  );
 
-  const maxPageButtons = 5;
-
-  const getPageList = () => {
-    if (totalPages <= maxPageButtons) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-
-    const half = Math.floor(maxPageButtons / 2);
-    let start = Math.max(2, page - half + 1);
-    let end = Math.min(totalPages - 1, start + maxPageButtons - 3);
-
-    if (end - start < maxPageButtons - 3) {
-      start = Math.max(2, end - (maxPageButtons - 3));
-    }
-
-    const pages: (number | string)[] = [1];
-    if (start > 2) pages.push("…");
-    for (let i = start; i <= end; i++) pages.push(i);
-    if (end < totalPages - 1) pages.push("…");
-    if (totalPages > 1) pages.push(totalPages);
-    return pages;
+  const renderContent = () => {
+    if (tasksLoading) return <div className="text-center py-5">Loading tasks...</div>;
+    if (error) return <div className="alert alert-danger">{error}</div>;
+    
+    return viewMode === "list" ? (
+      <TaskListView tasks={tasks}/>
+    ) : (
+      <TaskCardView tasks={tasks} />
+    );
   };
 
   return (
@@ -100,240 +221,33 @@ export default function TaskTable() {
       <div className="card-body">
         <div className="task-table-wrapper px-3 py-4">
           <div className="d-flex justify-content-between align-items-center mb-3">
-            <h4 className="font-poppins mb-0 fs-5 fs-md-4 fs-lg-3">
-              Search Filters
-            </h4>
-            <div>
-              <Button
-                variant={viewMode === "list" ? "primary" : "outline-secondary"}
-                className="me-2"
-                size="sm"
-                style={{
-                  backgroundColor: viewMode === "list" ? "#6a6dfb" : undefined,
-                  borderColor: "#6a6dfb",
-                }}
-                onClick={() => handleViewChange("list")}
-              >
-                <i className="bi bi-list"></i> List
-              </Button>
-              <Button
-                variant={viewMode === "card" ? "primary" : "outline-secondary"}
-                size="sm"
-                style={{
-                  backgroundColor: viewMode === "card" ? "#6a6dfb" : undefined,
-                  borderColor: "#6a6dfb",
-                }}
-                onClick={() => handleViewChange("card")}
-              >
-                <i className="bi bi-grid-3x3-gap"></i> Cards
-              </Button>
-            </div>
+            <h4 className="font-poppins mb-0 fs-5 fs-md-4 fs-lg-3">Search Filters</h4>
+            {renderViewToggle()}
           </div>
 
           <div className="mb-3">
-            {/* Top Row: Filters */}
-            <div className="row g-2 mb-2">
-              <div className="col-md">
-                <select
-                  className="form-select form-select-sm"
-                  onChange={(e) =>
-                    handleFilterChange("category", e.target.value)
-                  }
-                >
-                  <option value="">Select Category</option>
-                  <option value="UI/UX">UI/UX</option>
-                  <option value="Backend">Backend</option>
-                  <option value="Documentation">Documentation</option>
-                </select>
-              </div>
-              <div className="col-md">
-                <select
-                  className="form-select form-select-sm"
-                  onChange={(e) =>
-                    handleFilterChange("priority", e.target.value)
-                  }
-                >
-                  <option value="">Select Priority</option>
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
-                </select>
-              </div>
-              <div className="col-md">
-                <select
-                  className="form-select form-select-sm"
-                  onChange={(e) => handleFilterChange("status", e.target.value)}
-                >
-                  <option value="">Select Status</option>
-                  <option value="To Do">To Do</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Done">Done</option>
-                  <option value="On Hold">On Hold</option>
-                </select>
-              </div>
-            </div>
+            {renderFilters()}
+            <hr className="border border-dark my-5" />
 
-            <div>
-              <hr className="border border-dark my-5" />
-            </div>
-
-            {/* Bottom Row: Pagination + Search + Add */}
             <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
-              <div>
-                <select
-                  className="form-select"
-                  value={tasksPerPage}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value, 10);
-                    setTasksPerPage(value);
-                    setPage(1);
-                  }}
-                >
-                  {viewMode === "list" ? (
-                    <>
-                      <option value={5}>5 per page</option>
-                      <option value={10}>10 per page</option>
-                      <option value={20}>20 per page</option>
-                      <option value={50}>50 per page</option>
-                      <option value={0}>All</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value={6}>6 per page</option>
-                      <option value={12}>12 per page</option>
-                      <option value={18}>18 per page</option>
-                      <option value={0}>All</option>
-                    </>
-                  )}
-                </select>
-              </div>
-
-             <div className="row g-2">
-                <div className="col-12 col-md-4">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search User"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-
-                <div className="col-12 col-md-4">
-                  <button
-                    className="btn btn-primary w-100 text-white"
-                    style={{ backgroundColor: "#6a6dfb", whiteSpace: "nowrap" }}
-                  >
-                    + Add New Task
-                  </button>
-                </div>
-
-                <div className="col-12 col-md-4">
-                  <button
-                    className="btn btn-primary w-100 text-white"
-                    style={{ backgroundColor: "#6a6dfb", whiteSpace: "nowrap" }}
-                  >
-                    + Add New Category
-                  </button>
-                </div>
-              </div>
+              <Form.Select
+                className="pe-4"
+                value={pagination.pageSize as string | number | readonly string[] | undefined}
+                onChange={handlePageSizeChange}
+              >
+                {VIEW_CONFIG[viewMode].pageSizes.map((n) => (
+                  <option key={n} value={n}>
+                    {n === 0 ? "All" : `${n} per page`}
+                  </option>
+                ))}
+              </Form.Select>
+              
+              {renderActionButtons()}
             </div>
           </div>
 
-          {viewMode === "list" ? (
-            <TaskListView
-              tasks={paginatedTasks}
-              onTaskSelect={(t) => {
-                setSelectedTask(t);
-                setShowDetails(true);
-              }}
-            />
-          ) : (
-            <TaskCardView
-              tasks={paginatedTasks}
-              onTaskSelect={(t) => {
-                setSelectedTask(t);
-                setShowDetails(true);
-              }}
-            />
-          )}
-
-          {selectedTask && (
-            <TaskBoardDetails
-              task={selectedTask}
-              show={showDetails}
-              onClose={() => setShowDetails(false)}
-              currentUser={currentUser}
-              onUpdateTask={(updatedTask) => {
-                const updatedTasks = allTasks.map((task) =>
-                  task.id === updatedTask.id ? updatedTask : task
-                );
-                setSelectedTask(updatedTask);
-              }}
-            />
-          )}
-
-          {totalPages > 1 && (
-            <nav className="mt-3">
-              <ul className="pagination justify-content-center">
-                <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                  <button className="page-link" onClick={() => setPage(1)}>
-                    &laquo;
-                  </button>
-                </li>
-                <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                  <button
-                    className="page-link"
-                    onClick={() => setPage(page - 1)}
-                  >
-                    &lsaquo;
-                  </button>
-                </li>
-
-                {getPageList().map((p, i) =>
-                  typeof p === "string" ? (
-                    <li key={i} className="page-item disabled">
-                      <span className="page-link">…</span>
-                    </li>
-                  ) : (
-                    <li
-                      key={i}
-                      className={`page-item ${page === p ? "active" : ""}`}
-                    >
-                      <button className="page-link" onClick={() => setPage(p)}>
-                        {p}
-                      </button>
-                    </li>
-                  )
-                )}
-
-                <li
-                  className={`page-item ${
-                    page === totalPages ? "disabled" : ""
-                  }`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => setPage(page + 1)}
-                  >
-                    &rsaquo;
-                  </button>
-                </li>
-                <li
-                  className={`page-item ${
-                    page === totalPages ? "disabled" : ""
-                  }`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => setPage(totalPages)}
-                  >
-                    &raquo;
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          )}
+          {renderContent()}
+          {renderPagination()}
         </div>
       </div>
     </div>
