@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import type { SearchFiltersDto } from "../interfaces/task";
 import { fetchSearchFilters } from "../services/filterServices";
 
 export default function useSearchFilters() {
-  const [filters, setFilters] = useState<SearchFiltersDto>({
+  const [filters, setFilters] = useState<{
+    statuses: string[];
+    priorities: string[];
+    categories: string[];
+  }>({
     statuses: [],
     priorities: [],
     categories: [],
@@ -14,7 +17,13 @@ export default function useSearchFilters() {
 
   useEffect(() => {
     fetchSearchFilters()
-      .then(setFilters)
+      .then((data) => {
+        setFilters({
+          statuses: data.statuses.map((s) => s.name),
+          priorities: data.priorities.map((p) => p.name),
+          categories: data.categories.map((c) => c.name),
+        });
+      })
       .catch((err) => {
         console.error(err);
         setError("Failed to load filters");
