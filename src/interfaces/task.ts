@@ -1,8 +1,12 @@
-// src/interfaces/task.ts
+export interface IdNameDto {
+  id: number;
+  name: string;
+}
+
 export interface SearchFiltersDto {
-  statuses: string[];
-  priorities: string[];
-  categories: string[];
+  statuses: IdNameDto[];
+  priorities: IdNameDto[];
+  categories: IdNameDto[];
 }
 
 export interface User {

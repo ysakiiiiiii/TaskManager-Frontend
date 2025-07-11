@@ -1,165 +1,128 @@
-import React from 'react';
-import { allTasks } from '../data/allTasks';
-import { BarChart, Bar, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
+import React, { useMemo } from 'react';
+import {
+  BarChart, Bar, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid
+} from 'recharts';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import RecentTasks from '../components/RecentTasks';
-import type { Task, Status, Priority, Category } from '../data/types';
+import { useAuth } from '../context/AuthContext';
+import useStatCounts from '../hooks/useStatCounts';
+import useCategoryNames from '../hooks/useCategoryNames';
+import { aggregateCountsByKey } from '../utils/statUtils';
 
 const COLORS = {
-  Pending: '#7E57C2',
+  'To Do': '#7E57C2',
   'On Hold': '#EE534F',
   'In Progress': '#26C6DA',
-  Completed: '#66BB6A',
+  'Done': '#66BB6A',
   Low: '#26A69A',
   Medium: '#FFA726',
   High: '#EF5350',
-  'UI/UX': '#8E24AA',
-  Backend: '#00ACC1',
-  Documentation: '#43A047',
-  DevOps: '#5C6BC0',
-  Testing: '#EC407A'
+  'Backend': '#00ACC1',
+  'Backend Integration': '#5E35B1',
+  'Frontend Development': '#42A5F5',
+  'Project Management': '#AB47BC',
+  'Quality Assurance': '#EC407A',
 };
 
-// Mock data for task history
-const taskHistoryData = [
-  { date: 'Mar 1', created: 2, completed: 1 },
-  { date: 'Mar 5', created: 3, completed: 2 },
-  { date: 'Mar 10', created: 5, completed: 3 },
-  { date: 'Mar 15', created: 4, completed: 2 },
-  { date: 'Mar 20', created: 6, completed: 4 },
-  { date: 'Mar 25', created: 3, completed: 5 },
-];
-
 const Dashboard = () => {
-  // Calculate task statistics with proper typing
-  const statusCounts: Record<string, number> = { 
-    'To Do': 0, 
-    'In Progress': 0, 
-    'Done': 0,                                                  
-    'On Hold': 0 
-  };
-  
-  const priorityCounts: Record<Priority, number> = { 
-    Low: 0, 
-    Medium: 0, 
-    High: 0 
-  };
-  
-  const categoryCounts: Record<Category, number> = { 
-    'UI/UX': 0, 
-    Backend: 0, 
-    Documentation: 0,
-    DevOps: 0,
-    Testing: 0
-  };
-  
-  let overdueCount = 0;
-  const today = new Date('2025-03-25');
+  const { user } = useAuth();
+  const { users, loading } = useStatCounts();
+  const categoryMap = useCategoryNames();
 
-  allTasks.forEach((task) => {
-    // Status counts
-    statusCounts[task.status]++;
-    
-    // Priority counts
-    priorityCounts[task.priority]++;
-    
-    // Category counts
-    categoryCounts[task.category]++;
-    
-    // Overdue tasks
-    const dueDateParts = task.dueDate?.split('/');
-    if (dueDateParts && dueDateParts.length === 3) {
-      const dueDate = new Date(`20${dueDateParts[2]}-${dueDateParts[1]}-${dueDateParts[0]}`);
-      if (dueDate < today && task.status !== 'Done') overdueCount++;
-    }
+  const isAdmin = user?.role === 'Admin';
 
-  });
+  const targetUsers = useMemo(() => {
+    if (loading) return [];
+    return isAdmin ? users : users.filter(u => u.id === user?.id);
+  }, [users, user, isAdmin, loading]);
 
-  // Convert status counts to chart data (grouping Pending statuses)
+  console.log('isAdmin:', isAdmin);
+console.log('Logged-in user:', user);
+console.log('Fetched users:', users);
+console.log('Target users:', targetUsers);
+targetUsers.forEach((u) => {
+  console.log(`User: ${u.fullName || u.firstName} (${u.id})`);
+  console.log('  Status Counts:', u.taskStatusCounts);
+  console.log('  Priority Counts:', u.taskPriorityCounts);
+  console.log('  Category Counts:', u.taskCategoryCounts);
+});
+
+
+  const priorityMap = {
+    1: 'Low',
+    2: 'Medium',
+    3: 'High',
+  };
+
+const statusCounts = aggregateCountsByKey(
+  Object.fromEntries(targetUsers.map(u => [u.id, u.taskStatusCounts ?? []])),
+  'id'
+);
+
+const priorityCounts = aggregateCountsByKey(
+  Object.fromEntries(targetUsers.map(u => [u.id, u.taskPriorityCounts ?? []])),
+  'id'
+);
+
+const categoryCounts = aggregateCountsByKey(
+  Object.fromEntries(targetUsers.map(u => [u.id, u.taskCategoryCounts ?? []])),
+  'id'
+);
+
+
+
+  const totalTasks = Object.values(statusCounts).reduce((sum, c) => sum + c, 0);
+  const doneTasks = statusCounts[3] || 0;
+  const completionRate = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
   const statusData = [
-    { name: 'Pending', value: statusCounts['To Do'] },
-    { name: 'On Hold', value: statusCounts['On Hold'] },
-    { name: 'In Progress', value: statusCounts['In Progress'] },
-    { name: 'Completed', value: statusCounts['Done'] }
+    { name: 'To Do', value: statusCounts[1] || 0 },
+    { name: 'On Hold', value: statusCounts[4] || 0 },
+    { name: 'In Progress', value: statusCounts[2] || 0 },
+    { name: 'Done', value: statusCounts[3] || 0 },
   ];
 
-  const priorityData = Object.entries(priorityCounts).map(([name, count]) => ({
-    name,
+  const priorityData = Object.entries(priorityCounts).map(([id, count]) => ({
+    name: priorityMap[+id as keyof typeof priorityMap] || `Priority ${id}`,
     count
   }));
 
-  const categoryData = Object.entries(categoryCounts).map(([name, count]) => ({
-    name,
+  const categoryData = Object.entries(categoryCounts).map(([id, count]) => ({
+    name: categoryMap[+id] || `Category ${id}`,
     count
   }));
 
-  const totalTasks = allTasks.length;
-  const completionRate = totalTasks > 0 ? Math.round((statusCounts['Done'] / totalTasks) * 100) : 0;
-
-  // Format today's date
-  const options: Intl.DateTimeFormatOptions = {
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString('en-US', {
     weekday: 'long',
     day: 'numeric',
     month: 'short',
     year: 'numeric'
-  };
-  const formattedDate = today.toLocaleDateString('en-US', options);
+  });
 
-  // Get recent tasks (last 5)
-  const recentTasks = [...allTasks]
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-    .slice(0, 5);
+  console.log('Aggregated Status Counts:', statusCounts);
+console.log('Aggregated Priority Counts:', priorityCounts);
+console.log('Aggregated Category Counts:', categoryCounts);
+console.log('Completion Rate:', completionRate);
+console.log('Raw status count input:', Object.fromEntries(
+  targetUsers.map(u => [u.id, u.taskStatusCounts ?? null])
+));
 
   return (
-    <div className="container-fluid">
-      {/* Greeting Section */}
-      <div className="row mb-5">
-        <div className="col-md-12">
-          <div className="card border-0 shadow-md rounded-4">
+    <div className="container-fluid py-4">
+      {/* Header Section */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card border-0 shadow-sm rounded-3">
             <div className="card-body p-4">
-              <div className="row align-items-center">
-                <div className="col-md-4">
-                  <h2 className="mb-1 fw-bold">Good Morning, Admin!</h2>
-                  <p className="text-muted mb-4">{formattedDate}</p>
+              <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+                <div className="mb-3 mb-md-0">
+                  <h1 className="h3 fw-bold mb-1">Good Morning, {isAdmin ? 'Admin' : user?.firstName}!</h1>
+                  <p className="text-muted mb-0">{formattedDate}</p>
                 </div>
-                <div className="col-md-8">
-                  <div className="row g-3">
-                    <div className="col-6 col-sm-4 col-lg-2">
-                      <div className="p-3 bg-white rounded shadow-sm border-start border-4 border-primary">
-                        <h4 className="mb-0 fw-bold">{totalTasks}</h4>
-                        <small className="text-muted">Total Tasks</small>
-                      </div>
-                    </div>
-                    <div className="col-6 col-sm-4 col-lg-2">
-                      <div className="p-3 bg-white rounded shadow-sm border-start border-4 border-warning">
-                        <h4 className="mb-0 fw-bold">{statusCounts['To Do'] + statusCounts['On Hold']}</h4>
-                        <small className="text-muted">Pending</small>
-                      </div>
-                    </div>
-                    <div className="col-6 col-sm-4 col-lg-2">
-                      <div className="p-3 bg-white rounded shadow-sm border-start border-4 border-info">
-                        <h4 className="mb-0 fw-bold">{statusCounts['In Progress']}</h4>
-                        <small className="text-muted">In Progress</small>
-                      </div>
-                    </div>
-                    <div className="col-6 col-sm-4 col-lg-2">
-                      <div className="p-3 bg-white rounded shadow-sm border-start border-4 border-success">
-                        <h4 className="mb-0 fw-bold">{statusCounts['Done']}</h4>
-                        <small className="text-muted">Completed</small>
-                      </div>
-                    </div>
-                    <div className="col-6 col-sm-4 col-lg-2">
-                      <div className="p-3 bg-white rounded shadow-sm border-start border-4 border-danger">
-                        <h4 className="mb-0 fw-bold">{overdueCount}</h4>
-                        <small className="text-muted">On Hold</small>
-                      </div>
-                    </div>
-                    <div className="col-6 col-sm-4 col-lg-2">
-                      <div className="p-3 bg-white rounded shadow-sm border-start border-4 border-secondary">
-                        <h4 className="mb-0 fw-bold">{completionRate}%</h4>
-                        <small className="text-muted">Completion Rate</small>
-                      </div>
-                    </div>
+                <div className="d-flex align-items-center">
+                  <div className={`badge bg-${completionRate >= 75 ? 'success' : completionRate >= 50 ? 'warning' : 'danger'} py-2 px-3 rounded-pill`}>
+                    <span className="fw-bold">{completionRate}%</span> Completion Rate
                   </div>
                 </div>
               </div>
@@ -168,141 +131,210 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Charts Section - Top Row */}
-      <div className="row">
-        {/* Task Distribution Pie Chart */}
-        <div className="col-md-6 mb-4">
-          <div className="card h-100 border-0 shadow-md rounded-4">
-            <div className="card-body">
-              <h5 className="card-title py-2">Task Distribution</h5>
-              <div style={{ height: '300px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={statusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={2}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
-                    >
-                      {statusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value} tasks`, 'Count']} />
-                    <Legend wrapperStyle={{ display: 'flex', gap: '20px', justifyContent: 'center' }}/>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Task Priority Bar Chart */}
-        <div className="col-md-6 mb-4">
-          <div className="card h-100 border-0 shadow-md rounded-4">
-            <div className="card-body">
-              <h5 className="card-title py-2">Task Priority Levels</h5>
-              <div style={{ height: '300px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={priorityData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`${value} tasks`, 'Count']} />
-                    <Bar dataKey="count" name="Tasks" radius={[4, 4, 0, 0]}>
-                      {priorityData.map((entry, index) => (
-                        <Cell key={`bar-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Charts Section - Bottom Row */}
+      {/* Stats Cards Section - Adjusted column classes */}
       <div className="row mb-4">
-        {/* Task Category Bar Chart */}
-        <div className="col-md-6 mb-4">
-          <div className="card h-100 border-0 shadow-md rounded-4">
-            <div className="card-body">
-              <h5 className="card-title py-2">Task Categories</h5>
-              <div style={{ height: '300px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={categoryData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`${value} tasks`, 'Count']} />
-                    <Bar dataKey="count" name="Tasks" radius={[4, 4, 0, 0]}>
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`bar-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Task History Line Chart */}
-        <div className="col-md-6 mb-4">
-          <div className="card h-100 border-0 shadow-md rounded-4">
-            <div className="card-body">
-              <h5 className="card-title">Task History</h5>
-              <div style={{ height: '300px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={taskHistoryData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="created" 
-                      stroke="#7E57C2" 
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                      name="Tasks Created"
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="completed" 
-                      stroke="#66BB6A" 
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                      name="Tasks Completed"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </div>
+        <StatCard 
+          title="Total Tasks" 
+          count={totalTasks} 
+          icon="bi-list-task" 
+          color="primary" 
+          description="All assigned tasks" 
+        />
+        <StatCard 
+          title="Pending" 
+          count={(statusCounts[1] || 0) + (statusCounts[4] || 0)} 
+          icon="bi-hourglass-top" 
+          color="warning" 
+          description="To Do + On Hold"
+        />
+        <StatCard 
+          title="In Progress" 
+          count={statusCounts[2] || 0} 
+          icon="bi-arrow-repeat" 
+          color="info" 
+          description="Currently being worked on"
+        />
+        <StatCard 
+          title="Completed" 
+          count={statusCounts[3] || 0} 
+          icon="bi-check-circle" 
+          color="success" 
+          description="Finished tasks"
+        />
+       
       </div>
 
-      {/* Recent Tasks Section */}
-      <div className="row">
-        <div className="col-md-12">
-          <div className="card border-0 shadow-sm">
-            <div className="card-body">
-              <RecentTasks tasks={allTasks} onTaskSelect={() => {}} />
-            </div>
-          </div>
+      {/* Charts Section */}
+      <div className="row g-4">
+        <div className="col-lg-4 col-md-6">
+          <ChartCard 
+            title="Task Status" 
+            type="pie" 
+            data={statusData} 
+            colorKey="name" 
+            height={350}
+            description="Breakdown of tasks by status"
+          />
+        </div>
+        <div className="col-lg-4 col-md-6">
+          <ChartCard 
+            title="Priority Levels" 
+            type="bar" 
+            data={priorityData} 
+            dataKey="count" 
+            colorKey="name" 
+            height={350}
+            description="Distribution of task priorities"
+          />
+        </div>
+        <div className="col-lg-4 col-md-12">
+          <ChartCard 
+            title="Task Categories" 
+            type="bar" 
+            data={categoryData} 
+            dataKey="count" 
+            colorKey="name" 
+            height={350}
+            description="Tasks by category"
+            showLabel={false} 
+          />
         </div>
       </div>
     </div>
   );
 };
+
+const StatCard = ({ title, count, icon, color, description }: { 
+  title: string; 
+  count: number | string; 
+  icon?: string;
+  color: string;
+  description?: string;
+}) => (
+  <div className="col-6 col-sm-4 col-lg-3 col-xl-2-4 mb-3"> {/* Adjusted column classes */}
+    <div className={`card border-start-lg border-${color} h-100`}>
+      <div className="card-body">
+        <div className="d-flex align-items-center">
+          <div className={`bg-${color}-subtle rounded p-3 me-3`}>
+            <i className={`bi ${icon || 'bi-card-checklist'} text-${color} fs-4`}></i>
+          </div>
+          <div>
+            <h2 className="mb-1 fw-bold">{count}</h2>
+            <h6 className="mb-0 text-muted">{title}</h6>
+            {description && <small className="text-muted">{description}</small>}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const ChartCard = ({
+  title,
+  type,
+  data,
+  colorKey,
+  dataKey = 'value',
+  height = 300,
+  description,
+  showLabel = true
+}: {
+  title: string;
+  type: 'pie' | 'bar';
+  data: any[];
+  colorKey: string;
+  dataKey?: string;
+  height?: number;
+  description?: string;
+  showLabel?: boolean;
+}) => (
+  <div className="card h-100 shadow-sm">
+    <div className="card-body">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="card-title mb-0">{title}</h5>
+        {description && (
+          <span className="badge bg-light text-dark">
+            <i className="bi bi-info-circle me-1"></i>
+          </span>
+        )}
+      </div>
+      {description && <p className="text-muted small mb-3">{description}</p>}
+      <div style={{ height: `${height}px` }}>
+        <ResponsiveContainer width="100%" height="100%">
+          {type === 'pie' ? (
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                paddingAngle={2}
+                dataKey={dataKey}
+                label={showLabel ? ({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%` : false}
+              >
+                {data.map((entry, index) => (
+                  <Cell key={index} fill={COLORS[entry[colorKey] as keyof typeof COLORS] || '#8884d8'} />
+                ))}
+              </Pie>
+              <Tooltip 
+                formatter={(value) => [`${value} tasks`, 'Count']}
+                labelFormatter={(label) => `Status: ${label}`}
+              />
+              {title !== 'Task Categories' && (
+                <Legend
+                  layout="horizontal"
+                  verticalAlign="bottom"
+                  align="center"
+                  wrapperStyle={{ paddingTop: '20px' }}
+                />
+              )}
+            </PieChart>
+          ) : (
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="name" 
+                tick={title !== 'Task Categories' ? { fontSize: 12 } : false}
+                axisLine={false}
+                tickLine={false}
+              />
+
+              <YAxis 
+                tick={{ fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip 
+                cursor={{ fill: '#f5f5f5' }}
+                formatter={(value) => [`${value} tasks`, 'Count']}
+                labelFormatter={(label) => `${label}`}
+              />
+              <Bar 
+                dataKey={dataKey} 
+                name="Tasks" 
+                radius={[4, 4, 0, 0]}
+                barSize={24}
+              >
+                {data.map((entry, index) => (
+                  <Cell key={index} fill={COLORS[entry[colorKey] as keyof typeof COLORS] || '#8884d8'} />
+                ))}
+              </Bar>
+              {title !== 'Task Categories' && (
+                <Legend
+                  layout="horizontal"
+                  verticalAlign="bottom"
+                  align="center"
+                  wrapperStyle={{ paddingTop: '20px' }}
+                />
+              )}
+            </BarChart>
+          )}
+        </ResponsiveContainer>
+      </div>
+    </div>
+  </div>
+);
+
 
 export default Dashboard;

@@ -1,5 +1,8 @@
-export interface TaskStatusCount {
-  statusId: number;
+// interfaces/user.ts
+export interface CountItem {
+  statusId?: number;
+  priorityId?: number;
+  categoryId?: number;
   count: number;
 }
 
@@ -7,13 +10,18 @@ export interface User {
   id: string;
   firstName: string;
   lastName: string;
-  fullName: string;
   email: string;
-  role: string | null;
+  fullName?: string;
+  role?: string;
   userCreated: string;
-  userModified?: string;
-  isActive?: boolean; 
-  taskStatusCounts?: TaskStatusCount[];
+  userModified?: string | null;
+  taskStatusCounts?: CountById[];   
+  taskPriorityCounts?: CountById[]; 
+  taskCategoryCounts?: CountById[]; 
+}
+export interface CountById {
+  id: number;
+  count: number;
 }
 
 export interface PaginatedUserResponse {
