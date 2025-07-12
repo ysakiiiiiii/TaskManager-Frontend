@@ -93,10 +93,10 @@ const SidebarLayout: React.FC = () => {
       {/* Overlay for mobile */}
       {isMobile && isSidebarOpen && <div className="overlay" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Main content area */}
+      {/* Main content area display */}
       <div className="content-area d-flex flex-column">
         <TopNavbar onToggleSidebar={toggleSidebar} />
-        <div className="main-content flex-grow-1 overflow-auto px-3 pe-1">
+        <div className="main-content flex-grow-1 overflow-auto px-3">
           <Outlet />
         </div>
       </div>

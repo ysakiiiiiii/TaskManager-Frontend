@@ -66,17 +66,17 @@ const TeamMemberCardView: React.FC<TeamMemberCardViewProps> = ({
                   <span className="text-muted small">Tasks:</span>
                   {user.taskStatusCounts?.length ? (
                     <div className="d-flex gap-2 flex-wrap">
-                      {user.taskStatusCounts.map(({ statusId, count }) => (
+                      {user.taskStatusCounts.map(({ id, count }) => (
                         <span
-                          key={statusId}
+                          key={id}
                           className="badge rounded-pill px-2 py-1"
                           style={{ 
-                            backgroundColor: getStatusColor(statusLabels[statusId]),
+                            backgroundColor: getStatusColor(statusLabels[id]),
                             color: "white",
                             fontSize: "0.75rem"
                           }}
                         >
-                          {statusLabels[statusId]}: {count}
+                          {statusLabels[id]}: {count}
                         </span>
                       ))}
                     </div>

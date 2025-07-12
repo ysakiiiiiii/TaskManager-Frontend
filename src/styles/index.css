@@ -10,3 +10,74 @@ html, body, #root {
 }
 
 
+.toast {
+  transition: opacity 0.3s ease;
+}
+
+.toast.hide {
+  display: block;
+  opacity: 0;
+}
+
+.toast.show {
+  display: block;
+  opacity: 1;
+}
+
+.status-pill {
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+
+.table {
+  border-collapse: separate;
+  border-spacing: 0 12px;
+}
+
+.table thead {
+  background-color: transparent;
+  border: none;
+}
+
+.table thead th {
+  background-color: #f0f2f5;
+  color: #333;
+  font-weight: 600;
+  border: none;
+  padding: 14px;
+  border-radius: 8px 8px 0 0;
+}
+
+.table tbody tr {
+  background-color: #ffffff;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.table tbody tr:hover {
+  transform: scale(1.01);
+}
+
+.table td {
+  border: none;
+  vertical-align: middle;
+  padding: 16px;
+  font-size: 14px;
+  color: #444;
+}
+
+.table td:first-child {
+  border-left: 5px solid #5b6dfa;
+  border-radius: 8px 0 0 8px;
+}
+
+.table td:last-child {
+  border-radius: 0 8px 8px 0;
+}

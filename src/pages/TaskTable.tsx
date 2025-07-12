@@ -8,6 +8,8 @@ import TaskCardView from "../components/TaskCardView";
 import { Button, Form } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
 import { useTasks } from "../hooks/useTasks";
+import useToast from "../hooks/useToast";
+import { useNavigate } from "react-router-dom";
 
 const DEFAULT_FILTERS = {
   category: "",
@@ -33,7 +35,7 @@ const VIEW_CONFIG = {
 export default function TaskTable() {
   const { user, role, loading: authLoading } = useAuth();
   const { filters: enumFilters, loading: filtersLoading } = useSearchFilters();
-  
+  const { toast, showToast } = useToast();
   const [viewMode, setViewMode] = useState<keyof typeof VIEW_CONFIG>("list");
   
   const {
@@ -45,9 +47,17 @@ export default function TaskTable() {
     updateFilters,
     changePage,
     changePageSize,
-    refreshTasks,
   } = useTasks(useMemo(() => DEFAULT_FILTERS, []));
+  
+    const navigate = useNavigate();
 
+    const handleAddTask = () => {
+      navigate("/tasks/new");
+    };
+
+    const handleCategory = () => {
+      navigate("/tasks/manageCategory");
+    };
 
   const filterOptions = useMemo(() => [
     { key: "category", label: "Category", values: enumFilters.categories },
@@ -205,6 +215,7 @@ export default function TaskTable() {
           variant="primary" 
           className="w-100 text-white"
           style={{ backgroundColor: "#6a6dfb" }}
+          onClick={handleAddTask}
         >
           + Add New Task
         </Button>
@@ -214,10 +225,11 @@ export default function TaskTable() {
         <div className="col-12 col-md-4">
           <Button 
             variant="primary" 
-            className="w-100 text-white text-nowrap"
+            className="w-100 text-white text-nowrap pe-5"
             style={{ backgroundColor: "#6a6dfb", minWidth:"200px"}}
+            onClick={handleCategory}
           >
-            + Add New Category
+            + Manage Categories
           </Button>
         </div>
       )}
@@ -229,8 +241,14 @@ export default function TaskTable() {
     if (error) return <div className="alert alert-danger">{error}</div>;
     if (tasks.length === 0) return <div className="text-center py-5">No tasks found matching your criteria</div>;
     
-    return viewMode === "list" ? (
-      <TaskListView tasks={tasks}/>
+
+     const handleDelete = (deletedId: number) => {
+        updateFilters({ ...filters }); // Refresh tasks
+        showToast("Task deleted successfully.", "success");
+      };
+
+      return viewMode === "list" ? (
+      <TaskListView tasks={tasks} onDelete={handleDelete}  showToast={showToast}/>
     ) : (
       <TaskCardView tasks={tasks} />
     );
@@ -270,6 +288,20 @@ export default function TaskTable() {
           {renderContent()}
           {renderPagination()}
         </div>
+        {toast && (
+            <div
+              className={`toast align-items-center text-white ${
+                toast.type === "success" ? "bg-success" : "bg-danger"
+              } position-fixed bottom-0 end-0 m-4 show`}
+              role="alert"
+              style={{ zIndex: 9999 }}
+            >
+              <div className="d-flex">
+                <div className="toast-body">{toast.message}</div>
+              </div>
+            </div>
+          )}
+
       </div>
     </div>
   );

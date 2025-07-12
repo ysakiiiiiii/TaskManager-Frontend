@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import TeamMemberCardView from "../components/TeamMemberCardView";
 import TeamMemberListView from "../components/TeamMemberListView";
+import useToggleUserStatus from "../hooks/useToggleUserStatus";
 import useUsers from "../hooks/useUsers";
 import type { User } from "../interfaces/user";
 import "../styles/TeamDashboard.css";
@@ -13,16 +14,19 @@ const TeamDashboard: React.FC = () => {
   const [search, setSearch] = useState("");
   const [tasksPerPage, setTasksPerPage] = useState(viewMode === "list" ? 5 : 6);
 
-  const { data, loading } = useUsers(statusFilter, page, tasksPerPage);
-  const users = data?.items ?? [];
+  const { data, loading } = useUsers(statusFilter, page, tasksPerPage, search);
+  const [users, setUsers] = useState<User[]>([]);
   const totalCount = data?.totalCount ?? 0;
   const totalPages = tasksPerPage === 0 ? 1 : Math.ceil(totalCount / tasksPerPage);
+  const { handleToggleStatus } = useToggleUserStatus();
 
-  const paginatedUsers = users.filter((user) =>
-    `${user.firstName} ${user.lastName} ${user.email}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+ const paginatedUsers = users;
+
+  useEffect(() => {
+    if (data?.items) {
+      setUsers(data.items);
+    }
+  }, [data]);
 
   const handleFilterChange = (key: "status", value: string) => {
     if (key === "status") setStatusFilter(value);
@@ -36,8 +40,17 @@ const TeamDashboard: React.FC = () => {
   };
 
   const toggleStatus = (id: string) => {
-    console.log("Toggle not persisted. This should call an API.");
-  };
+  const user = users.find((u) => u.id === id);
+  if (!user) return;
+
+  handleToggleStatus(user.id, user.isActive, () => {
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === id ? { ...u, isActive: !u.isActive } : u
+      )
+    );
+  });
+};
 
   const handleEdit = (user: User) => {
     console.log("Edit user:", user);

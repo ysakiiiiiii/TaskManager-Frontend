@@ -11,6 +11,11 @@ import AccountSettings from '../pages/AccountSettings';
 import AdminDashboard from '../pages/AdminDashboard';
 import TeamDashboard from '../pages/TeamDashboard';
 import { useAuth } from '../context/AuthContext';
+import AddTaskPage from '../pages/AddTaskPage';
+import ManageCategoriesPage from '../pages/ManageCategoriesPage';
+import TaskDetailsPage from '../pages/TaskDetailsPage';
+import TaskEditPage from '../pages/TaskEditPage';
+// import TaskEditPage from '../pages/TaskEditPage';
 
 const AppRoutes = () => {
   const { role } = useAuth();
@@ -28,11 +33,15 @@ const AppRoutes = () => {
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/tasks" element={<TaskTable />} />
         <Route path="/account" element={<AccountSettings />} />
+        <Route path="/tasks/new" element={<AddTaskPage />} />
+        <Route path="/tasks/:id" element={<TaskDetailsPage />} />
+        <Route path="/tasks/:taskId/edit" element={<TaskEditPage />} />
 
         {/* Admin-only routes */}
         <Route element={<ProtectedRoute allowedRoles={['admin']} userRole={role} />}>
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/users" element={<TeamDashboard />} />
+          <Route path="/tasks/manageCategory" element={<ManageCategoriesPage />} />
         </Route>
       </Route>
 

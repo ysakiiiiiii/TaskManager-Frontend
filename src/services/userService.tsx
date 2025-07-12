@@ -1,18 +1,27 @@
 import api from "../api/api";
-import type { PaginatedUserResponse } from "../interfaces/user";
+import type {ApiResponse } from "../interfaces/user";
 
-export const getUsers = async (
+export async function getUsers(
   isActive: boolean | null,
   page: number,
-  pageSize: number
-): Promise<PaginatedUserResponse> => {
-  const params: any = {
-    page,
-    pageSize: pageSize === 0 ? 10000 : pageSize, 
-  };
-  if (isActive !== null) params.isActive = isActive;
+  pageSize: number,
+  search: string
+) {
+  const response = await api.get("/User/AllUsers", {
+    params: {
+      isActive,
+      page,
+      pageSize,
+      search: search || undefined,
+    },
+  });
 
-  const response = await api.get("/User/AllUsers", { params });
-  return response.data.data; 
+  return response.data.data;
+}
+
+
+
+export const toggleUserStatus = async (userId: string): Promise<ApiResponse> => {
+  const response = await api.patch(`/User/ToggleStatus/${userId}`);
+  return response.data;
 };
-
