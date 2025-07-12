@@ -1,5 +1,5 @@
 import React from "react";
-import { Table, Badge } from "react-bootstrap";
+import { Badge } from "react-bootstrap";
 import { getAvatarUrl, getStatusColor, statusLabels } from "../utils/userUtils";
 import type { User } from "../interfaces/user";
 
@@ -57,13 +57,13 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
             </td>
             <td className="d-none d-lg-table-cell">
               {user.taskStatusCounts?.length
-                ? user.taskStatusCounts.map(({ statusId, count }) => (
+                ? user.taskStatusCounts.map(({ id, count }) => (
                     <span
-                      key={statusId}
+                      // key={IDBCursorWithValue}
                       className="badge rounded-pill"
-                      style={{ backgroundColor: getStatusColor(statusLabels[statusId]) }}
+                      style={{ backgroundColor: getStatusColor(statusLabels[id]) }}
                     >
-                      {statusLabels[statusId]}: {count}
+                      {statusLabels[id]}: {count}
                     </span>
                   ))
                 : <span className="text-muted small">No tasks</span>}
@@ -86,13 +86,13 @@ const TeamMemberListView: React.FC<TeamMemberListViewProps> = ({
                   <i className={`bi ${user.isActive ? 'bi-toggle-on' : 'bi-toggle-off'}`} style={{ fontSize: '1.5rem' }} />
                 </button>
 
-                <button
+                {/* <button
                   className="btn btn-sm p-2 rounded-circle text-primary"
                   aria-label="Edit"
                   onClick={() => onEdit(user)}
                 >
                   <i className="bi bi-pencil" />
-                </button>
+                </button> */}
 
                 <button
                   className="btn btn-sm p-2 rounded-circle text-muted hover-danger"

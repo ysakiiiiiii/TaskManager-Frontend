@@ -13,6 +13,7 @@ export interface User {
   email: string;
   fullName?: string;
   role?: string;
+  isActive : boolean;
   userCreated: string;
   userModified?: string | null;
   taskStatusCounts?: CountById[];   
@@ -29,11 +30,11 @@ export interface PaginatedUserResponse {
   totalCount: number;
   currentPage: number;
   pageSize: number;
+  search: string;
 }
-
-export interface PaginatedUserResponse {
-  items: User[];
-  totalCount: number;
-  currentPage: number;
-  pageSize: number;
+export interface ApiResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data?: any;
 }

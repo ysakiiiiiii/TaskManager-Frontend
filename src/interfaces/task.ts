@@ -36,6 +36,7 @@ export interface Attachment {
   fileName: string;
   fileExtension: string;
   filePath: string;
+  contentType?:string,
   dateUploaded: string;
   uploadedById: string;
   uploadedBy?: User;
@@ -43,9 +44,12 @@ export interface Attachment {
 
 export interface Comment {
   id: number;
+  isEdited: boolean;
+  userAvatar: string;
+  userName: string;
   content: string;
   dateCreated: string;
-  createdById: string;
+  userId: string;
   createdBy?: User;
 }
 
@@ -109,12 +113,52 @@ export interface TaskFilterParams {
   pageSize?: number;
 }
 
+export interface TaskCreateDto {
+  title: string;
+  description: string;
+  categoryId: number;
+  priorityId: number;
+  statusId: number;
+  dueDate?: string;
+  assignedUserIds: string[];
+}
+
+export interface TaskUpdateDto {
+  id: number;
+  title: string;
+  description: string;
+  categoryId: number;
+  priorityId: number;
+  statusId: number;
+  dueDate?: string; 
+  assignedUserIds: string[];
+  checklistItems: CheckListDto[]; 
+}
+
+export interface CheckListDto {
+  id: number;
+  description: string;
+  isCompleted: boolean;
+}
+
+export interface AttachmentDto {
+  id: number;
+  fileName: string;
+  fileExtension: string;
+  filePath: string;
+  dateUploaded: string; 
+  uploadedById: string;
+}
+
+
+
 export const getAvatarUrl = (name: string): string => {
   return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
 };
 
 export const transformTask = (task: any): Task => {
-  const createdByName = task.createdByName || "Unassigned";
+  console.log('Task Data:', task);
+
 
   return {
     id: task.id,
@@ -136,7 +180,10 @@ export const transformTask = (task: any): Task => {
     })),
 
     checklistItems: task.checklistItems ?? [],
-    comments: task.comments ?? [],
+    comments: (task.comments ?? []).map((c: any) => ({
+      ...c,
+      userAvatar: c.userAvatar || getAvatarUrl(c.userName),
+    })),
     attachments: (task.attachments ?? []).map((att: any) => ({
       ...att,
       uploadedBy: att.uploadedBy
@@ -153,8 +200,8 @@ export const transformTask = (task: any): Task => {
 
     createdBy: {
       id: task.createdById,
-      fullName: createdByName,
-      avatar: getAvatarUrl(createdByName),
+      fullName: task.createdByName || "Unassigned",
+      avatar: getAvatarUrl(task.createdByName),
     },
 
     category: {
@@ -173,3 +220,4 @@ export const transformTask = (task: any): Task => {
     },
   };
 };
+

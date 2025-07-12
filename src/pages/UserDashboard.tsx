@@ -36,18 +36,6 @@ const Dashboard = () => {
     return isAdmin ? users : users.filter(u => u.id === user?.id);
   }, [users, user, isAdmin, loading]);
 
-  console.log('isAdmin:', isAdmin);
-console.log('Logged-in user:', user);
-console.log('Fetched users:', users);
-console.log('Target users:', targetUsers);
-targetUsers.forEach((u) => {
-  console.log(`User: ${u.fullName || u.firstName} (${u.id})`);
-  console.log('  Status Counts:', u.taskStatusCounts);
-  console.log('  Priority Counts:', u.taskPriorityCounts);
-  console.log('  Category Counts:', u.taskCategoryCounts);
-});
-
-
   const priorityMap = {
     1: 'Low',
     2: 'Medium',
@@ -100,13 +88,7 @@ const categoryCounts = aggregateCountsByKey(
     year: 'numeric'
   });
 
-  console.log('Aggregated Status Counts:', statusCounts);
-console.log('Aggregated Priority Counts:', priorityCounts);
-console.log('Aggregated Category Counts:', categoryCounts);
-console.log('Completion Rate:', completionRate);
-console.log('Raw status count input:', Object.fromEntries(
-  targetUsers.map(u => [u.id, u.taskStatusCounts ?? null])
-));
+
 
   return (
     <div className="container-fluid py-4">

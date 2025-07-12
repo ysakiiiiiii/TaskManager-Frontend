@@ -1,37 +1,32 @@
 import React from "react";
-import type { Task } from '../interfaces/task';
+import { useNavigate } from "react-router-dom";
+import type { Task } from "../interfaces/task";
 import { getStatusColor } from "../utils/userUtils";
-
 interface TaskCardViewProps {
   tasks: Task[];
 }
 
 const TaskCardView: React.FC<TaskCardViewProps> = ({ tasks }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="row">
-      {tasks.map((task, idx) => {
+      {tasks.map((task) => {
         const completedCount = task.checklistItems.filter(item => item.isCompleted).length;
         const totalCount = task.checklistItems.length;
         const progressPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
         return (
-          <div key={idx} className="col-md-6 col-lg-4 mb-4">
+          <div key={task.id} className="col-md-6 col-lg-4 mb-4">
             <div
-              className="card h-100 shadow-sm p-3 transition-all"
+              className="card h-100 shadow-sm p-3"
               style={{
                 backgroundColor: "#fff",
-                borderLeft: `6px solid ${getStatusColor(task.status?.name || '')}`,
-                borderTopLeftRadius: "1rem",
-                borderBottomLeftRadius: "1rem",
-                borderRight: "1px solid #dee2e6",
-                borderTop: "1px solid #dee2e6",
-                borderBottom: "1px solid #dee2e6",
-                minHeight: "200px",
-                display: "flex",
-                flexDirection: "column",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                borderLeft: `6px solid ${getStatusColor(task.status?.name || "")}`,
                 cursor: "pointer",
+                transition: "transform 0.2s ease",
               }}
+              onClick={() => navigate(`/tasks/${task.id}`)}
               onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
               onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
